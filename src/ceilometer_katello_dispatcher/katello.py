@@ -39,6 +39,9 @@ cfg.CONF.register_opts(katello_dispatcher_opts, group="dispatcher_katello")
 class KatelloDispatcher(dispatcher.Base):
     '''Dispatcher class for recording metering data to katello.
 
+    to deploy:
+     add "katello = ceilometer_katello_dispatcher.katello:KatelloDispatcher" to /usr/lib/python2.6/site-packages/ceilometer-2013.2-py2.6.egg-info/entry_points.txt
+
     example entries in ceilometer.conf:
 
     [dispatcher_katello]
@@ -60,12 +63,12 @@ class KatelloDispatcher(dispatcher.Base):
         self.log = None
 
         # if the directory and path are configured, then log to the file
-        if self.conf.dispatcher_katello.file_path:
+        if self.conf.dispatcher_katello.log_file_path:
             dispatcher_logger = logging.Logger('dispatcher.katello')
             dispatcher_logger.setLevel(logging.INFO)
             # create rotating file handler which logs meters
             rfh = logging.handlers.RotatingFileHandler(
-                self.conf.dispatcher_katello.file_path,
+                self.conf.dispatcher_katello.log_file_path,
                 maxBytes=self.conf.dispatcher_katello.max_bytes,
                 backupCount=self.conf.dispatcher_katello.backup_count,
                 encoding='utf8')
