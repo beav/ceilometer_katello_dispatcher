@@ -33,7 +33,7 @@ rm -rf %{buildroot}
 %defattr(-,root,root,-)
 %doc README.md
 
-%dir %{python_sitearch}/ceilometer_katello_dispatcher
+%dir %{python_sitelib}/ceilometer_katello_dispatcher
 
-%{python_sitearch}/ceilometer_katello_dispatcher/*
-%{python_sitearch}/ceilometer_katello_dispatcher-*.egg-info
+%{python_sitelib}/ceilometer_katello_dispatcher/*
+%{python_sitelib}/ceilometer_katello_dispatcher-*.egg-info
