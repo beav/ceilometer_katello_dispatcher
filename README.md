@@ -9,17 +9,17 @@ to set up an rdo instance in a vm:
  * on the VM: follow http://openstack.redhat.com/QuickStartLatest or http://openstack.redhat.com/Quickstart
  * on the VM: check out and install dispatcher code, and edit /etc/ceilometer/ceilometer.conf
 
-    [dispatcher_katello]
-    log_file_path = /var/log/ceilometer/katello.log
-    default_owner = ACME_Corporation
+        [dispatcher_katello]
+        log_file_path = /var/log/ceilometer/katello.log
+        default_owner = ACME_Corporation
 
-    [collector]
-    dispatchers = katello 
-    dispatchers = database # this needs to be defined if we are also defining the katello dispatcher
+        [collector]
+        dispatchers = katello 
+        dispatchers = database # this needs to be defined if we are also defining the katello dispatcher
 
  * on the VM: edit /usr/lib/python2.6/site-packages/ceilometer-2013.2-py2.6.egg-info/entry_points.txt (this step will go away)
 
-    katello = ceilometer_katello_dispatcher.katello:KatelloDispatcher
+        katello = ceilometer_katello_dispatcher.katello:KatelloDispatcher
 
  * on the VM: service openstack-ceilometer-collector restart
  * from the horizon dashboard, fire up an instance. Cirros works fine for this.
