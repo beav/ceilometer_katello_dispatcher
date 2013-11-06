@@ -1,5 +1,5 @@
 Name: ceilometer_katello_dispatcher
-Version: 0.0.2
+Version: 0.0.3
 Release: 1%{?dist}
 
 Summary: A ceilometer dispatcher to feed instance events into katello
@@ -40,3 +40,8 @@ rm -rf %{buildroot}
 %{python_sitelib}/ceilometer_katello_dispatcher-*.egg-info
 
 %changelog
+* Wed Nov 06 2013 Chris Duryee <cduryee@redhat.com> 0.0.3-1
+- spec file fixup (cduryee@redhat.com)
+- spec file fixup (cduryee@redhat.com)
+- spec file fixup (cduryee@redhat.com)
+

@@ -17,7 +17,7 @@ from setuptools import setup, find_packages, Extension
 
 setup(
     name="ceilometer_katello_dispatcher",
-    version='0.0.2',
+    version='0.0.3',
     description='A ceilometer dispatcher for feeding instance events into katello',
     author='Chris Duryee',
     author_email='cduryee@redhat.com',
