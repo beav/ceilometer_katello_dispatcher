@@ -8,6 +8,7 @@ License: GPLv2
 Source0: %{name}-%{version}.tar.gz
 URL: http://github.com/Katello/ceilometer_katello_dispatcher
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+BuildArch: noarch
 
 Requires: python-rhsm >= 1.8.9
 
