@@ -8,19 +8,14 @@ import logging
 import logging.handlers
 from oslo.config import cfg
 from ceilometer.collector import dispatcher
+from ceilometer.openstack.common import log
 
 from rhsm.connection import UEPConnection
 
+LOG = log.getLogger(__name__)
+
+
 katello_dispatcher_opts = [
-    cfg.StrOpt('log_file_path',
-               default=None,
-               help='Log file for katello dispatcher'),
-    cfg.IntOpt('max_bytes',
-               default=0,
-               help='max bytes per logfile'),
-    cfg.IntOpt('backup_count',
-               default=0,
-               help='number of backup logfiles'),
     cfg.StrOpt('default_owner',
                default=None,
                help='owner to use when registering systems'),
@@ -47,37 +42,15 @@ class KatelloDispatcher(dispatcher.Base):
         self.cp = UEPConnection(username=self.conf.dispatcher_katello.kt_username,
                                 password=self.conf.dispatcher_katell.kt_pass)
 
-        self.log = None
-
-        # if the directory and path are configured, then log to the file
-        if self.conf.dispatcher_katello.log_file_path:
-            dispatcher_logger = logging.Logger('dispatcher.katello')
-            dispatcher_logger.setLevel(logging.INFO)
-            # create rotating file handler which logs meters
-            rfh = logging.handlers.RotatingFileHandler(
-                self.conf.dispatcher_katello.log_file_path,
-                maxBytes=self.conf.dispatcher_katello.max_bytes,
-                backupCount=self.conf.dispatcher_katello.backup_count,
-                encoding='utf8')
-
-            rfh.setLevel(logging.INFO)
-            # Only wanted the meters to be saved in the file, not the
-            # project root logger.
-            dispatcher_logger.propagate = False
-            dispatcher_logger.addHandler(rfh)
-            self.log = dispatcher_logger
-
     def record_metering_data(self, context, data):
         # TODO: i'm not sure if its ok to send facts up, we always want the client's facts to win.
-        if not self.log:
-            return
         for d in data:
             if d['counter_name'] == 'instance':
                 if d['resource_metadata']['event_type'] == 'compute.instance.exists':
-                    self.log.info("system checkin for %s" % d['resource_id'])
+                    LOG.info("recording system checkin for %s" % d['resource_id'])
                 elif d['resource_metadata']['event_type'] == 'compute.instance.delete.end':
                     self.cp.unregisterConsumer(d['resource_id'])
-                    self.log.info("system deletion for %s" % d['resource_id'])
+                    LOG.info("sent system deletion for %s" % d['resource_id'])
                 elif d['resource_metadata']['event_type'] == 'compute.instance.create.end':
                     facts = {'system.name': d['resource_metadata']['display_name'],
                              'virt.host_type': 'kvm',
@@ -87,14 +60,4 @@ class KatelloDispatcher(dispatcher.Base):
                                              owner=self.conf.dispatcher_katello.default_owner, uuid=d['resource_id'],
                                              installed_products=[{"productId": 601, "productName": 'OSP_guest_slot'}],
                                              facts = facts)
-                    self.log.info("system created for %s" % d['resource_id'])
-                    self.log.info("facts: %s" % facts)
-                self.log.info(d)
-            else:
-                self.log.info("not instance: %s" % d['counter_name'])
-
-
-    def record_events(self, events):
-        if self.log:
-            self.log.info(events)
-        return []
+                    LOG.info("sent system creation for %s" % d['resource_id'])

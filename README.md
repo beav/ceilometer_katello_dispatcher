@@ -17,7 +17,6 @@ to set up an rdo instance in a vm
  * on the VM: check out and install dispatcher code, and edit /etc/ceilometer/ceilometer.conf
 
         [dispatcher_katello]
-        log_file_path = /var/log/ceilometer/katello.log
         default_owner = ACME_Corporation
 
         [collector]
@@ -30,16 +29,13 @@ to set up an rdo instance in a vm
 
  * on the VM: service openstack-ceilometer-collector restart
  * from the horizon dashboard, fire up an instance. Cirros works fine for this.
- * you should see output in /var/log/ceilometer/katello.log
+ * you should see katello-related output in /var/log/ceilometer/collector.log
  
 
 to install: python ./setup.py install; service openstack-ceilometer-collector restart
 
 to check for clean startup: grep katello /var/log/ceilometer/collector.log
 
-if /var/log/ceilometer/katello.log exists, that means the dispatcher loaded properly
-
 TODO
 ----
 
-log errors to katello.log instead of collector.log
