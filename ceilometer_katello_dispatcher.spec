@@ -18,7 +18,7 @@ BuildRequires: python-setuptools
 A ceilometer dispatcher to feed instance events into katello
 
 %prep
-%setup -q -n m-%{version}
+%setup -q -n ceilometer_katello_dispatcher-%{version}
 
 %build
 %{__python} setup.py build
