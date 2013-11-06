@@ -1,12 +1,19 @@
 ceilometer_katello_dispatcher
 =============================
 
-to set up an rdo instance in a vm:
+requirements
+------------
+python-rhsm 1.8.9 or later
+
+
+to set up an rdo instance in a vm
+---------------------------------
 
  * find a fedora machine
  * if intel, run "rmmod kvm_intel; modprobe kvm_intel nested=y"
  * create a rhel or centos vm. 4GB mem and 2 CPU works ok.
  * on the VM: follow http://openstack.redhat.com/QuickStartLatest or http://openstack.redhat.com/Quickstart
+ * on the VM: edit /etc/rhsm/rhsm.conf to point to your katello system
  * on the VM: check out and install dispatcher code, and edit /etc/ceilometer/ceilometer.conf
 
         [dispatcher_katello]
@@ -31,3 +38,8 @@ to install: python ./setup.py install; service openstack-ceilometer-collector re
 to check for clean startup: grep katello /var/log/ceilometer/collector.log
 
 if /var/log/ceilometer/katello.log exists, that means the dispatcher loaded properly
+
+TODO
+----
+
+log errors to katello.log instead of collector.log

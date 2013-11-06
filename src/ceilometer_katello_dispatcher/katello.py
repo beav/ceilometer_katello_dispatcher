@@ -25,10 +25,10 @@ katello_dispatcher_opts = [
                default=None,
                help='owner to use when registering systems'),
     # this should be using oauth
-    cfg.StrOpt('katello_login',
+    cfg.StrOpt('kt_username',
                default=None,
                help='katello login'),
-    cfg.StrOpt('katello_pw',
+    cfg.StrOpt('kt_pass',
                default=None,
                help='katello passwd'),
 ]
@@ -44,7 +44,8 @@ class KatelloDispatcher(dispatcher.Base):
     def __init__(self, conf):
         super(KatelloDispatcher, self).__init__(conf)
 
-        self.cp = UEPConnection(username="admin", password="admin", insecure=True)
+        self.cp = UEPConnection(username=self.conf.dispatcher_katello.kt_username,
+                                password=self.conf.dispatcher_katell.kt_pass)
 
         self.log = None
 
@@ -83,7 +84,7 @@ class KatelloDispatcher(dispatcher.Base):
                              'virt.is_guest': True,
                              'virt.uuid': d['resource_id']}
                     self.cp.registerConsumer(d['resource_metadata']['display_name'], "system",
-                                             owner="ACME_Corporation", uuid=d['resource_id'],
+                                             owner=self.conf.dispatcher_katello.default_owner, uuid=d['resource_id'],
                                              installed_products=[{"productId": 601, "productName": 'OSP_guest_slot'}],
                                              facts = facts)
                     self.log.info("system created for %s" % d['resource_id'])
