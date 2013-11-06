@@ -1,5 +1,5 @@
 Name: ceilometer_katello_dispatcher
-Version: 0.0.1
+Version: 0.0.2
 Release: 1%{?dist}
 
 Summary: A ceilometer dispatcher to feed instance events into katello
