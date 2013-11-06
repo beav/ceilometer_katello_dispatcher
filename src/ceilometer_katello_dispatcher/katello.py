@@ -61,3 +61,7 @@ class KatelloDispatcher(dispatcher.Base):
                                              installed_products=[{"productId": 601, "productName": 'OSP_guest_slot'}],
                                              facts = facts)
                     LOG.info("sent system creation for %s" % d['resource_id'])
+
+    def record_events(self, context, data):
+        # we only care about metering data right now
+        return []
