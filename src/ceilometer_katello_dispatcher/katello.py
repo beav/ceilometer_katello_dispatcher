@@ -37,22 +37,8 @@ cfg.CONF.register_opts(katello_dispatcher_opts, group="dispatcher_katello")
 
 
 class KatelloDispatcher(dispatcher.Base):
-    '''Dispatcher class for recording metering data to katello.
-
-    to deploy:
-     add "katello = ceilometer_katello_dispatcher.katello:KatelloDispatcher" to /usr/lib/python2.6/site-packages/ceilometer-2013.2-py2.6.egg-info/entry_points.txt
-
-    example entries in ceilometer.conf:
-
-    [dispatcher_katello]
-    log_file_path = /var/log/ceilometer/katello.log
-    default_owner = ACME_Corporation
-
-    To enable this dispatcher, the following section needs to be present in
-    ceilometer.conf file
-
-    [collector]
-    dispatchers = katello 
+    '''
+    Dispatcher class for recording metering data to katello.
     '''
 
     def __init__(self, conf):
