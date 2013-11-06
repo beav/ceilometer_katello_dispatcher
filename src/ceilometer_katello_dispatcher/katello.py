@@ -40,7 +40,7 @@ class KatelloDispatcher(dispatcher.Base):
         super(KatelloDispatcher, self).__init__(conf)
 
         self.cp = UEPConnection(username=self.conf.dispatcher_katello.kt_username,
-                                password=self.conf.dispatcher_katell.kt_pass)
+                                password=self.conf.dispatcher_katello.kt_pass)
 
     def record_metering_data(self, context, data):
         # TODO: i'm not sure if its ok to send facts up, we always want the client's facts to win.
