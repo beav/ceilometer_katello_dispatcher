@@ -38,3 +38,5 @@ rm -rf %{buildroot}
 
 %{python_sitelib}/ceilometer_katello_dispatcher/*
 %{python_sitelib}/ceilometer_katello_dispatcher-*.egg-info
+
+%changelog
