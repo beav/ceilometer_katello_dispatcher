@@ -1,0 +1,3 @@
+script:
+  - "./scripts/ceilometer_katello_dispatcher_pr_ci.sh"
+
