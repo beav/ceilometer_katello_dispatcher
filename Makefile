@@ -1,8 +1,7 @@
 # a lot of this is based on python-rhsm and katello-cli's Makfiles
 
 SRC_DIR     = src/ceilometer_katello_dispatcher
-PYFILES=`find  src/ -name "*.py"`
-TESTFILES=`find test/ -name "*.py"`
+PYFILES=`find  src/ test/ -name "*.py"`
 STYLEFILES=$(PYFILES)
 
 .PHONY: test cover

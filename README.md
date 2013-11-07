@@ -1,3 +1,5 @@
+![build status](https://travis-ci.org/Katello/ceilometer_katello_dispatcher.png?branch=master)
+
 ceilometer_katello_dispatcher
 =============================
 
@@ -44,3 +46,14 @@ TODO
  * nosetests
  * feed host/guest info to katello from ceilometer events
  * create system checkins from hourly instance.exists events
+
+How to commit
+-------------
+
+ * fork a copy of https://github.com/Katello/ceilometer_katello_dispatcher
+ * write some failing nosetests, just run "make" to run them
+ * fix tests
+ * push to your fork, create a PR
+ * wait for travis to run
+ * wait for an ACK + merge
+ * done!

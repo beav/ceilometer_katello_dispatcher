@@ -46,9 +46,7 @@ class KatelloDispatcher(dispatcher.Base):
         # TODO: i'm not sure if its ok to send facts up, we always want the client's facts to win.
         for d in data:
             if d['counter_name'] == 'instance':
-                if d['resource_metadata']['event_type'] == 'compute.instance.exists':
-                    LOG.info("recording system checkin for %s" % d['resource_id'])
-                elif d['resource_metadata']['event_type'] == 'compute.instance.delete.end':
+                if d['resource_metadata']['event_type'] == 'compute.instance.delete.end':
                     self.cp.unregisterConsumer(d['resource_id'])
                     LOG.info("sent system deletion for %s" % d['resource_id'])
                 elif d['resource_metadata']['event_type'] == 'compute.instance.create.end':
