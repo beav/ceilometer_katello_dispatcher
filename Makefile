@@ -37,21 +37,11 @@ whitespacelint: tablint trailinglint
 debuglint:
 	@! GREP_COLOR='7;31' grep --color -nP "pdb.set_trace|pydevd.settrace|import ipdb|import pdb|import pydevd" $(STYLEFILES)
 
-gettext_lint:
-	@TMPFILE=`mktemp` || exit 1; \
-	pcregrep -n --color=auto -M  "_\(.*[\'|\"].*[\'|\"]\s*\+\s*[\"|\'].*[\"|\'].*\)" $(STYLEFILES) | tee $$TMPFILE; \
-	! test -s $$TMPFILE
-
 INDENT_IGNORE="E121,E122,E123,E124,E125,E126,E127,E128"
 pep8:
 	@TMPFILE=`mktemp` || exit 1; \
 	pep8 --ignore E501,$(INDENT_IGNORE) --exclude ".#*" --repeat src $(STYLEFILES) | tee $$TMPFILE; \
 	! test -s $$TMPFILE
 
-rpmlint:
-	@TMPFILE=`mktemp` || exit 1; \
-	rpmlint -f rpmlint.config ceilometer_katello_dispatcher.spec | grep -v "^.*packages and .* specfiles checked\;" | grep -v "invalid-url" | tee $$TMPFILE; \
-	! test -s $$TMPFILE
-
-stylish: pyflakes whitespacelint pep8 gettext_lint rpmlint debuglint
+stylish: pyflakes whitespacelint pep8 debuglint
 
