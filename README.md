@@ -41,5 +41,6 @@ log messages are sent to /var/log/ceilometer/collector.log
 TODO
 ----
 
+ * nosetests
  * feed host/guest info to katello from ceilometer events
  * create system checkins from hourly instance.exists events

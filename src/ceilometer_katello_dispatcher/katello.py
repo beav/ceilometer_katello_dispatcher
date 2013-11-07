@@ -56,10 +56,10 @@ class KatelloDispatcher(dispatcher.Base):
                              'virt.host_type': 'kvm',
                              'virt.is_guest': True,
                              'virt.uuid': d['resource_id']}
+                    #installed_products=[{"productId": 999, "productName": 'example_product'}],
                     self.cp.registerConsumer(d['resource_metadata']['display_name'], "system",
                                              owner=self.conf.dispatcher_katello.default_owner, uuid=d['resource_id'],
-                                             installed_products=[{"productId": 601, "productName": 'OSP_guest_slot'}],
-                                             facts = facts)
+                                             facts=facts)
                     LOG.info("sent system creation for %s" % d['resource_id'])
 
     def record_events(self, context, data):
