@@ -1,4 +1,12 @@
 language: python
+
+# we want access to installed m2crypto
+virtualenv:
+  system_site_packages: true
+
+before_install:
+ - "sudo apt-get install m2crypto"
+
 script:
   - "./scripts/ceilometer_katello_dispatcher_pr_ci.sh"
 

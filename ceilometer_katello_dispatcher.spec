@@ -10,7 +10,8 @@ URL: http://github.com/Katello/ceilometer_katello_dispatcher
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch: noarch
 
-Requires: python-rhsm >= 1.8.9
+# needs to be version after uuid merge
+Requires: katello-cli
 Requires: python-ceilometer >= 2013.2
 
 BuildRequires: python-setuptools
