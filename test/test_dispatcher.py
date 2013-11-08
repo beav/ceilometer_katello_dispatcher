@@ -13,25 +13,28 @@
 
 from mock import MagicMock, patch
 from oslo.config import cfg
-from ceilometer_katello_dispatcher import katello
+from ceilometer_katello_dispatcher import katello_dispatcher
 
 
 class TestKatelloDispatcher():
 
     def setUp(self):
-        self.dispatcher = katello.KatelloDispatcher(cfg.CONF)
+        self.dispatcher = katello_dispatcher.KatelloDispatcher(cfg.CONF)
         self.ctx = None
 
-    @patch('rhsm.connection.UEPConnection.registerConsumer')
-    def test_create(self, mock_registerConsumer):
+    @patch('katello.client.api.system.SystemAPI.register')
+    def test_create(self, mock_register):
         self.dispatcher.record_metering_data(self.ctx, create_event)
-        mock_registerConsumer.assert_called_once_with('test2', 'system',
-                                       facts={'system.name': 'test2', 'virt.host_type': 'kvm',
-                                              'virt.is_guest': True, 'virt.uuid': 'a3ab1013-1b74-48df-9afd-89d7ea777dfc'},
-                                       owner=None,
-                                       uuid='a3ab1013-1b74-48df-9afd-89d7ea777dfc')
+        mock_register.assert_called_once_with(environment_id=None,
+                                              uuid='a3ab1013-1b74-48df-9afd-89d7ea777dfc',
+                                              installed_products=None,
+                                              last_checkin=None,
+                                              facts={'system.name': 'test2', 'virt.host_type': 'kvm',
+                                                     'virt.is_guest': True,
+                                                     'virt.uuid': 'a3ab1013-1b74-48df-9afd-89d7ea777dfc'},
+                                              activation_keys=None, org=None, cp_type='system', name='test2')
 
-    @patch('rhsm.connection.UEPConnection.unregisterConsumer')
+    @patch('katello.client.api.system.SystemAPI.unregister')
     def test_terminate(self, mock_unregisterConsumer):
         self.dispatcher.record_metering_data(self.ctx, terminate_event)
         mock_unregisterConsumer.assert_called_once_with('bb52add2-9bbe-42d6-84e8-bfc7977049ef')

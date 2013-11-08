@@ -29,7 +29,7 @@ setup(
     packages    = ["ceilometer_katello_dispatcher"],
     package_dir = {"ceilometer_katello_dispatcher" : "src/ceilometer_katello_dispatcher" },
 
-    entry_points = {"ceilometer.dispatcher": "katello = ceilometer_katello_dispatcher.katello:KatelloDispatcher"},
+    entry_points = {"ceilometer.dispatcher": "katello = ceilometer_katello_dispatcher.katello_dispatcher:KatelloDispatcher"},
 
 
     classifiers = [

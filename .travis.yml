@@ -1,12 +1,11 @@
 language: python
 
-# needed to build python-rhsm
-before_install:
- - "sudo apt-get install gcc libssl-dev m2crypto"
- - "git clone https://github.com/candlepin/python-rhsm; cd python-rhsm; python setup.py install; cd .."
-
+# we want access to installed m2crypto
 virtualenv:
   system_site_packages: true
+
+before_install:
+ - "sudo apt-get install m2crypto"
 
 script:
   - "./scripts/ceilometer_katello_dispatcher_pr_ci.sh"
