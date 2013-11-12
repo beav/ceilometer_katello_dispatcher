@@ -64,6 +64,9 @@ class KatelloDispatcher(dispatcher.Base):
         # TODO: i'm not sure if its ok to send facts up, we always want the client's facts to win.
         for d in data:
             if d['counter_name'] == 'instance':
+                if 'event_type' not in d['resource_metadata']:
+                    # bail if there is no event_type
+                    continue
                 if d['resource_metadata']['event_type'] == 'compute.instance.delete.end':
                     self.systemapi.unregister(d['resource_id'])
                     LOG.info("sent system deletion for %s" % d['resource_id'])
