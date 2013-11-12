@@ -39,6 +39,9 @@ class TestKatelloDispatcher():
         self.dispatcher.record_metering_data(self.ctx, terminate_event)
         mock_unregisterConsumer.assert_called_once_with('bb52add2-9bbe-42d6-84e8-bfc7977049ef')
 
+    def test_no_event_type(self):
+        self.dispatcher.record_metering_data(self.ctx, no_event_type_event)
+
     def test_record_events(self):
         # test that nothing is returned
         assert not self.dispatcher.record_events(self.ctx, None)
@@ -156,3 +159,16 @@ terminate_event = \
      u'project_id': u'38a314df0985484684d536bb787610f1',
      u'message_id': u'99b419fc-47e2-11e3-a2e9-525400770cf5',
      u'counter_type': u'gauge'}]
+
+# I haven't found one of these yet, I created this based on the error in collector.log
+no_event_type_event =  \
+[{u'counter_name': u'instance',
+  u'user_id': u'a487ab66bd994cf5aa0c749caef13e27',
+  u'resource_id': u'bb52add2-9bbe-42d6-84e8-bfc7977049ef',
+  u'timestamp': u'2013-11-07 19:27:11.756999',
+  u'message_signature': u'259dad84e7c37ebfe23e410eb9ab6ec0c6d44e61a431dcd8fe5c8ed0c87babcb',
+  u'resource_metadata':
+      {u'state_description': u'',
+       u'availability_zone': u'nova',
+       u'terminated_at': u'2013-11-07T19:27:10.531295'}
+}]
