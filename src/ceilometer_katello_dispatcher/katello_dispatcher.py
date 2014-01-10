@@ -7,7 +7,7 @@
 import logging
 import logging.handlers
 from oslo.config import cfg
-from ceilometer.collector import dispatcher
+from ceilometer import dispatcher
 from ceilometer.openstack.common import log
 
 from katello.client import server
