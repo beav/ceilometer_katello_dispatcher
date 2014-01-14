@@ -1,5 +1,5 @@
 Name: ceilometer_katello_dispatcher
-Version: 0.0.4
+Version: 0.0.5
 Release: 1%{?dist}
 
 Summary: A ceilometer dispatcher to feed instance events into katello
@@ -42,6 +42,13 @@ rm -rf %{buildroot}
 %{python_sitelib}/ceilometer_katello_dispatcher-*.egg-info
 
 %changelog
+* Fri Nov 08 2013 Chris Duryee <cduryee@redhat.com> 0.0.5-1
+- refactor to not use python-rhsm (cduryee@redhat.com)
+- nosetests (cduryee@redhat.com)
+- travis stuff (cduryee@redhat.com)
+- add stylish tests (cduryee@redhat.com)
+- fix logging (cduryee@redhat.com)
+
 * Wed Nov 06 2013 Chris Duryee <cduryee@redhat.com> 0.0.4-1
 - spec file fixup (cduryee@redhat.com)
 

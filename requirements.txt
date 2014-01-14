@@ -6,6 +6,6 @@ pep8
 pylint==0.26.0
 simplejson
 oslo.config
-ceilometer
+git+git://github.com/openstack/ceilometer.git
 git+git://github.com/Katello/katello-cli.git#egg=katello_cli
 

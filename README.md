@@ -43,17 +43,18 @@ log messages are sent to /var/log/ceilometer/collector.log
 TODO
 ----
 
- * nosetests
  * feed host/guest info to katello from ceilometer events
  * create system checkins from hourly instance.exists events
 
-How to commit
--------------
+development howto
+-----------------
 
  * fork a copy of https://github.com/Katello/ceilometer_katello_dispatcher
+ * find an example of the message you are interested in acting on from collector.log, put message in test_dispatcher.py
  * write some failing nosetests, just run "make" to run them
  * fix tests
- * push to your fork, create a PR
+ * integration test (still manual process for now)
+ * commit, push to your fork, create a PR
  * wait for travis to run
  * wait for an ACK + merge
  * done!
