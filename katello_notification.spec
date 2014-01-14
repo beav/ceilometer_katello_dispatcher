@@ -36,7 +36,7 @@ rm -rf %{buildroot}
 %defattr(-,root,root,-)
 %doc README.md
 
-%dir %{python_sitelib}/katello_notifiaction
+%dir %{python_sitelib}/katello_notification
 
 %{python_sitelib}/katello_notification/*
 %{python_sitelib}/katello_notification-*.egg-info
