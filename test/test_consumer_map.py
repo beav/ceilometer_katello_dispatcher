@@ -23,12 +23,10 @@ class TestConsumerMap(unittest.TestCase):
         self.temp_json = NamedTemporaryFile(delete=False)
         self.consumer_map = ConsumerMap(self.temp_json.name)
 
-
     def test_no_hypervisor_found(self):
         self.consumer_map = ConsumerMap('/unused/path/name')
         with self.assertRaises(KeyError):
             self.consumer_map.find_hypervisor_consumer_uuid(local_identifier="some_hostname")
-
 
     @patch('katello_notification.consumer_map.ConsumerMap._load_consumer_map')
     def test_hypervisor_found(self, mock_load_map):
@@ -44,7 +42,6 @@ class TestConsumerMap(unittest.TestCase):
         self.consumer_map.remove_hypervisor_consumer_uuid(local_identifier="some_hostname")
         mock_save_map.assert_called_once_with(data={}, fname='/unused/path/name')
 
-
     @patch('katello_notification.consumer_map.ConsumerMap._save_consumer_map')
     @patch('katello_notification.consumer_map.ConsumerMap._load_consumer_map')
     def test_add_hypervisor(self, mock_load_map, mock_save_map):
@@ -59,4 +56,3 @@ class TestConsumerMap(unittest.TestCase):
         mock_save_map.assert_called_with(data={'some_hostname': '9eddc386-7c91-11e3-99b6-40d7db0f677b',
                                                'some_hostname_two': '3d07466c-7c9d-11e3-bba9-40d7db0f677b'},
                                          fname='/unused/path/name')
-

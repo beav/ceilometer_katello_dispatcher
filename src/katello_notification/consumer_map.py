@@ -5,6 +5,7 @@ import logging
 
 log = logging.getLogger(__name__)
 
+
 class ConsumerMap():
     """
     this is a wrapper for looking up consumer UUIDs for systems
@@ -41,15 +42,12 @@ class ConsumerMap():
                 log.error("Unable to write mapping to %s" % fname)
                 log.exception(e)
 
-
-
     def __init__(self, hyp_json_filename):
         """
         load map, etc
         """
         self.hypervisor_consumer_json_fname = hyp_json_filename
         self.hypervisor_consumer_map = self._load_consumer_map(hyp_json_filename)
-
 
     def find_hypervisor_consumer_uuid(self, local_identifier):
         """
@@ -66,7 +64,6 @@ class ConsumerMap():
         self.hypervisor_consumer_map[local_identifier] = hyp_uuid
         # save immediately
         self._save_consumer_map(fname=self.hypervisor_consumer_json_fname, data=self.hypervisor_consumer_map)
-
 
     def remove_hypervisor_consumer_uuid(self, local_identifier):
         """
