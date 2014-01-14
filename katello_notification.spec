@@ -1,5 +1,5 @@
 Name: katello_notification
-Version: 0.0.6
+Version: 0.0.7
 Release: 1%{?dist}
 
 Summary: A daemon to read events off of the openstack messagebus and feed into katello
@@ -42,6 +42,9 @@ rm -rf %{buildroot}
 %{python_sitelib}/katello_notification-*.egg-info
 
 %changelog
+* Tue Jan 14 2014 Chris Duryee <cduryee@redhat.com> 0.0.7-1
+- fix spec typo (cduryee@redhat.com)
+
 * Tue Jan 14 2014 Chris Duryee <cduryee@redhat.com> 0.0.6-1
 - new package built with tito
 
