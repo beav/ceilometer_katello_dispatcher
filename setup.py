@@ -16,9 +16,9 @@
 from setuptools import setup, find_packages, Extension
 
 setup(
-    name="ceilometer_katello_dispatcher",
+    name="katello_notification",
     version='0.0.5',
-    description='A ceilometer dispatcher for feeding instance events into katello',
+    description='an oslo messagebus reader for interpreting events relevant to katello',
     author='Chris Duryee',
     author_email='cduryee@redhat.com',
     url='http://github.com/Katello/ceilometer_katello_dispatcher',
@@ -26,10 +26,11 @@ setup(
 
     test_suite = 'nose.collector',
 
-    packages    = ["ceilometer_katello_dispatcher"],
-    package_dir = {"ceilometer_katello_dispatcher" : "src/ceilometer_katello_dispatcher" },
+    packages    = ["katello_notification"],
+    package_dir = {"katello_notification" : "src/katello_notification" },
 
-    entry_points = {"ceilometer.dispatcher": "katello = ceilometer_katello_dispatcher.katello_dispatcher:KatelloDispatcher"},
+    entry_points = {"katello.notification": "instance = ceilometer.compute.notifications:Instance"},
+
 
 
     classifiers = [
