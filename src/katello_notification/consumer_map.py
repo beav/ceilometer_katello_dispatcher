@@ -4,6 +4,7 @@ from simplejson import JSONDecodeError
 import logging
 
 log = logging.getLogger(__name__)
+logging.basicConfig(level=logging.DEBUG)
 
 
 class ConsumerMap():
