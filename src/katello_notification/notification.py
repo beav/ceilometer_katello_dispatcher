@@ -43,6 +43,8 @@ class UnableToSaveEventException(Exception):
 class KatelloNotificationService(service.DispatchedService, rpc_service.Service):
 
     NOTIFICATION_NAMESPACE = 'katello.notification'
+    # this needs to be set, otherwise events will be stolen from ceilometer
+    TOPIC_OVERRIDE = 'subscription_notifications.info'
 
     def start(self):
         super(KatelloNotificationService, self).start()
@@ -85,6 +87,7 @@ class KatelloNotificationService(service.DispatchedService, rpc_service.Service)
 
         for exchange_topic in handler.get_exchange_topics(cfg.CONF):
             for topic in exchange_topic.topics:
+                topic = self.TOPIC_OVERRIDE
                 LOG.info("joining consumer pool for %r" % topic)
                 try:
                     self.conn.join_consumer_pool(
@@ -93,6 +96,7 @@ class KatelloNotificationService(service.DispatchedService, rpc_service.Service)
                         topic=topic,
                         exchange_name=exchange_topic.exchange,
                         ack_on_error=ack_on_error)
+                    LOG.info("joined consumer pool for %r" % topic)
                 except Exception:
                     LOG.exception(_('Could not join consumer pool'
                                     ' %(topic)s/%(exchange)s') %
@@ -107,12 +111,15 @@ class KatelloNotificationService(service.DispatchedService, rpc_service.Service)
 
         """
         LOG.info('notification %r', notification.get('event_type'))
-        hyp_consumer_uuid = ""
-
+        # we only care about creates, deletes, and migrates
+        # TODO: migration events
         try:
             if notification.get('event_type') == 'compute.instance.create.end':
-                LOG.info('find or create hypervisor')
+                hypervisor_consumer_uuid = self.payload_actions.find_or_create_hypervisor(notification.get('payload'))
                 self.payload_actions.find_or_create_hypervisor(notification.get('payload'))
+                self.payload_actions.create_guest_mapping(notification.get('payload'), hypervisor_consumer_uuid)
+            elif notification.get('event_type') == 'compute.instance.delete.end':
+                self.payload_actions.delete_guest(notification.get('payload'))
         except Exception, e:
             LOG.exception(e)
 

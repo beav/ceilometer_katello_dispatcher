@@ -29,7 +29,7 @@ setup(
     packages    = ["katello_notification"],
     package_dir = {"katello_notification" : "src/katello_notification" },
 
-    entry_points = {"katello.notification": "instance = ceilometer.compute.notifications.instance:Instance"},
+    entry_points = {"katello.notification": "instance = katello_notification.instance:Instance"},
 
 
 
