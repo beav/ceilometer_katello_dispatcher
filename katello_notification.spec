@@ -11,7 +11,7 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch: noarch
 
 # needs to be version after uuid merge
-Requires: katello-cli
+Requires: katello-cli-common
 Requires: python-ceilometer >= 2013.2
 
 BuildRequires: python-setuptools

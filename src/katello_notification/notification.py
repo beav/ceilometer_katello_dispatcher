@@ -2,15 +2,10 @@
 from oslo.config import cfg
 from stevedore import extension
 
-from ceilometer.event import converter as event_converter
-from ceilometer.openstack.common import context
 from ceilometer.openstack.common.gettextutils import _  # noqa
 from ceilometer.openstack.common.rpc import service as rpc_service
 from ceilometer.openstack.common import service as os_service
-from ceilometer import pipeline
 from ceilometer import service
-from ceilometer.storage import models
-from ceilometer import transformer
 
 from katello_notification.payload_actions import PayloadActions
 import logging
@@ -119,7 +114,8 @@ class KatelloNotificationService(service.DispatchedService, rpc_service.Service)
                 self.payload_actions.find_or_create_hypervisor(notification.get('payload'))
                 self.payload_actions.create_guest_mapping(notification.get('payload'), hypervisor_consumer_uuid)
             elif notification.get('event_type') == 'compute.instance.delete.end':
-                self.payload_actions.delete_guest(notification.get('payload'))
+                hypervisor_consumer_uuid = self.payload_actions.find_or_create_hypervisor(notification.get('payload'))
+                self.payload_actions.delete_guest_mapping(notification.get('payload'), hypervisor_consumer_uuid)
         except Exception, e:
             LOG.exception(e)
 
