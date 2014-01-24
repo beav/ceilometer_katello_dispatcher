@@ -21,9 +21,9 @@ class ConsumerMap():
                 try:
                     read_data = simplejson.load(f)
                 except ValueError:
-                    log.error("json file  %s is corrupt or empty, data will be reset on next write" % fname)
+                    log.warning("json file  %s is corrupt or empty, data will be reset on next write" % fname)
         except IOError:
-            log.error("unable to open %s, no hypervisor map will be loaded" % fname)
+            log.warning("unable to open %s, no hypervisor map will be loaded. This is expected during the daemon's initial run." % fname)
 
         return read_data
 
