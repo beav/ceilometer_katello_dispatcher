@@ -5,6 +5,7 @@ from katello_notification.katello_wrapper import Katello
 log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
 
+
 class PayloadActions():
     """
     payload wrapper to handle foreman calls
@@ -27,7 +28,7 @@ class PayloadActions():
             if not hyp_consumer_uuid:
                 log.error("no hypervisor found for %s" % hyp_host)
                 raise RuntimeError("no hypervisor found for %s" % hyp_host)
-            self.consumer_map.add_hypervisor_consumer_uuid(local_identifier=hyp_host, hyp_uuid = hyp_consumer_uuid)
+            self.consumer_map.add_hypervisor_consumer_uuid(local_identifier=hyp_host, hyp_uuid=hyp_consumer_uuid)
             log.info("saved uuid %s for hypervisor %s" % (hyp_consumer_uuid, hyp_host))
         return hyp_consumer_uuid
 

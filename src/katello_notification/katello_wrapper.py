@@ -6,6 +6,7 @@ import logging
 log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
 
+
 class Katello():
     def __init__(self):
         self.systemapi = SystemAPI()
@@ -22,7 +23,7 @@ class Katello():
         if len(systems) == 0:
             log.error("found zero systems for %s" % hypervisor_hostname)
             return
-            
+
         log.info("found %s for hostname %s!" % (systems[0]['uuid'], hypervisor_hostname))
         return systems[0]['uuid']
 
@@ -45,7 +46,7 @@ class Katello():
         guests = []
 
         for rg in raw_guestlist:
-           guests.append(rg['guestId']) 
+            guests.append(rg['guestId'])
 
         if guests and instance_uuid not in guests:
             guests.append(instance_uuid)
@@ -56,7 +57,6 @@ class Katello():
 
         log.info("sending guest list: %s" % params['guestIds'])
         self.systemapi.update(hypervisor_uuid, params)
-
 
     def unassociate_guest(self, instance_uuid, hypervisor_uuid):
         log.info("finding system record for %s" % hypervisor_uuid)
@@ -71,7 +71,7 @@ class Katello():
         guests = []
 
         for rg in raw_guestlist:
-           guests.append(rg['guestId']) 
+            guests.append(rg['guestId'])
 
         if guests and instance_uuid in guests:
             guests.remove(instance_uuid)
@@ -82,4 +82,3 @@ class Katello():
 
         log.info("sending guest list: %s" % params['guestIds'])
         self.systemapi.update(hypervisor_uuid, params)
-

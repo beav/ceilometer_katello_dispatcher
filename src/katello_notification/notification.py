@@ -120,7 +120,6 @@ class KatelloNotificationService(service.DispatchedService, rpc_service.Service)
             LOG.exception(e)
 
 
-
 def agent():
     service.prepare_service()
     os_service.launch(KatelloNotificationService(

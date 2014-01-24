@@ -1,7 +1,7 @@
 #based on ceilometer.compute.notification.instance
-
 from ceilometer.compute import notifications
 from ceilometer import sample
+
 
 class Instance(notifications.ComputeNotificationBase):
     event_types = ['compute.instance.create.end', 'compute.instance.exists']
