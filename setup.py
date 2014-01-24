@@ -31,8 +31,6 @@ setup(
 
     entry_points = {"katello.notification": "instance = katello_notification.instance:Instance"},
 
-
-
     classifiers = [
         'License :: OSI Approved :: GNU General Public License (GPL)',
         'Intended Audience :: Developers',
