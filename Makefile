@@ -1,6 +1,6 @@
 # a lot of this is based on python-rhsm and katello-cli's Makfiles
 
-SRC_DIR     = src/ceilometer_katello_dispatcher
+SRC_DIR     = src/katello_notification
 PYFILES=`find  src/ test/ -name "*.py"`
 STYLEFILES=$(PYFILES)
 

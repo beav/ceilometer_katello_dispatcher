@@ -1,26 +1,26 @@
-Name: ceilometer_katello_dispatcher
-Version: 0.0.5
+Name: katello_notification
+Version: 0.0.7
 Release: 1%{?dist}
 
-Summary: A ceilometer dispatcher to feed instance events into katello
+Summary: A daemon to read events off of the openstack messagebus and feed into katello
 Group: Development/Libraries
 License: GPLv2
 Source0: %{name}-%{version}.tar.gz
-URL: http://github.com/Katello/ceilometer_katello_dispatcher
+URL: http://github.com/Katello/katello_notification
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch: noarch
 
 # needs to be version after uuid merge
-Requires: katello-cli
+Requires: katello-cli-common
 Requires: python-ceilometer >= 2013.2
 
 BuildRequires: python-setuptools
 
 %description
-A ceilometer dispatcher to feed instance events into katello
+A daemon to read events off of the openstack messagebus and feed into katello
 
 %prep
-%setup -q -n ceilometer_katello_dispatcher-%{version}
+%setup -q -n katello_notification-%{version}
 
 %build
 %{__python} setup.py build
@@ -36,12 +36,18 @@ rm -rf %{buildroot}
 %defattr(-,root,root,-)
 %doc README.md
 
-%dir %{python_sitelib}/ceilometer_katello_dispatcher
+%dir %{python_sitelib}/katello_notification
 
-%{python_sitelib}/ceilometer_katello_dispatcher/*
-%{python_sitelib}/ceilometer_katello_dispatcher-*.egg-info
+%{python_sitelib}/katello_notification/*
+%{python_sitelib}/katello_notification-*.egg-info
 
 %changelog
+* Tue Jan 14 2014 Chris Duryee <cduryee@redhat.com> 0.0.7-1
+- fix spec typo (cduryee@redhat.com)
+
+* Tue Jan 14 2014 Chris Duryee <cduryee@redhat.com> 0.0.6-1
+- new package built with tito
+
 * Fri Nov 08 2013 Chris Duryee <cduryee@redhat.com> 0.0.5-1
 - refactor to not use python-rhsm (cduryee@redhat.com)
 - nosetests (cduryee@redhat.com)
