@@ -25,8 +25,7 @@ class TestConsumerMap(unittest.TestCase):
 
     def test_no_hypervisor_found(self):
         self.consumer_map = ConsumerMap('/unused/path/name')
-        with self.assertRaises(KeyError):
-            self.consumer_map.find_hypervisor_consumer_uuid(local_identifier="some_hostname")
+        self.assertRaises(KeyError, self.consumer_map.find_hypervisor_consumer_uuid, "some_hostname")
 
     @patch('katello_notification.consumer_map.ConsumerMap._load_consumer_map')
     def test_hypervisor_found(self, mock_load_map):

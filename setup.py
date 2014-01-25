@@ -21,7 +21,7 @@ setup(
     description='an oslo messagebus reader for interpreting events relevant to katello',
     author='Chris Duryee',
     author_email='cduryee@redhat.com',
-    url='http://github.com/Katello/ceilometer_katello_dispatcher',
+    url='http://github.com/Katello/katello_notification',
     license='GPLv2',
 
     test_suite = 'nose.collector',
@@ -29,9 +29,7 @@ setup(
     packages    = ["katello_notification"],
     package_dir = {"katello_notification" : "src/katello_notification" },
 
-    entry_points = {"katello.notification": "instance = ceilometer.compute.notifications:Instance"},
-
-
+    entry_points = {"katello.notification": "instance = katello_notification.instance:Instance"},
 
     classifiers = [
         'License :: OSI Approved :: GNU General Public License (GPL)',

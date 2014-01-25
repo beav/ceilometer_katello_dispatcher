@@ -1,9 +1,9 @@
 #!/usr/bin/python
 import simplejson
-from simplejson import JSONDecodeError
 import logging
 
 log = logging.getLogger(__name__)
+logging.basicConfig(level=logging.DEBUG)
 
 
 class ConsumerMap():
@@ -20,10 +20,10 @@ class ConsumerMap():
             with open(fname, 'r') as f:
                 try:
                     read_data = simplejson.load(f)
-                except JSONDecodeError:
-                    log.error("json file  %s is corrupt or empty, data will be reset on next write" % fname)
+                except ValueError:
+                    log.warning("json file  %s is corrupt or empty, data will be reset on next write" % fname)
         except IOError:
-            log.error("unable to open %s, no hypervisor map will be loaded" % fname)
+            log.warning("unable to open %s, no hypervisor map will be loaded. This is expected during the daemon's initial run." % fname)
 
         return read_data
 
