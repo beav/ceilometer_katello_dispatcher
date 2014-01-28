@@ -28,6 +28,8 @@ A daemon to read events off of the openstack messagebus and feed into katello
 %install
 rm -rf %{buildroot}
 %{__python} setup.py install --skip-build --root %{buildroot}
+install -D bin/openstack-katello-notification %{buildroot}/etc/rc.d/init.d/openstack-katello-notification
+install -D bin/katello-notification %{buildroot}/usr/bin/katello-notification
 
 %clean
 rm -rf %{buildroot}
@@ -40,6 +42,10 @@ rm -rf %{buildroot}
 
 %{python_sitelib}/katello_notification/*
 %{python_sitelib}/katello_notification-*.egg-info
+
+%attr(755,root,root) %{_initrddir}/openstack-katello-notification
+%attr(755,root,root) %{_bindir}/katello-notification
+
 
 %changelog
 * Tue Jan 14 2014 Chris Duryee <cduryee@redhat.com> 0.0.7-1

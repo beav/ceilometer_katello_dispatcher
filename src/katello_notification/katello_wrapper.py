@@ -15,7 +15,7 @@ class Katello():
         server.set_active_server(s)
 
     def find_hypervisor(self, hypervisor_hostname):
-        systems = self.systemapi.systems_by_org('ACME_Corporation', {'network.hostname': hypervisor_hostname})
+        systems = self.systemapi.systems_by_org('ACME_Corporation', {'search': "network.hostname:%s" % hypervisor_hostname})
 
         if len(systems) > 1:
             log.error("found too many systems for %s, name is ambiguous" % hypervisor_hostname)
