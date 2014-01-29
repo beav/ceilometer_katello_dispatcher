@@ -47,7 +47,7 @@ rm -rf %{buildroot}
 
 %attr(755,root,root) %{_initrddir}/openstack-katello-notification
 %attr(755,root,root) %{_bindir}/katello-notification
-%attr(755,root,root) %dir %{_var}/lib/katello-notification/cache
+%attr(755,ceilometer,ceilometer) %dir %{_var}/lib/katello-notification/cache
 %attr(755,root,root) %{_initrddir}/openstack-katello-notification
 %config(noreplace) %attr(644,root,root) %{_sysconfdir}/katello/katello-notification.conf
 
