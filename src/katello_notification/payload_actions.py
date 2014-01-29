@@ -5,6 +5,8 @@ from katello_notification.katello_wrapper import Katello
 log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
 
+HYPERVISOR_CACHE = '/var/lib/katello-notification/cache/hypervisors.json'
+
 
 class PayloadActions():
     """
@@ -13,7 +15,7 @@ class PayloadActions():
 
     def __init__(self):
         log.info("initializing payload actions")
-        self.consumer_map = ConsumerMap("/tmp/hyp.json")
+        self.consumer_map = ConsumerMap(HYPERVISOR_CACHE)
         self.katello = Katello()
 
     def find_or_create_hypervisor(self, payload):

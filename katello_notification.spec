@@ -30,6 +30,8 @@ rm -rf %{buildroot}
 %{__python} setup.py install --skip-build --root %{buildroot}
 install -D bin/openstack-katello-notification %{buildroot}/etc/rc.d/init.d/openstack-katello-notification
 install -D bin/katello-notification %{buildroot}/usr/bin/katello-notification
+install -D etc/katello-notification.conf %{buildroot}/etc/katello/katello-notification.conf
+mkdir -p %{buildroot}/%{_var}/lib/katello-notification/cache
 
 %clean
 rm -rf %{buildroot}
@@ -45,6 +47,10 @@ rm -rf %{buildroot}
 
 %attr(755,root,root) %{_initrddir}/openstack-katello-notification
 %attr(755,root,root) %{_bindir}/katello-notification
+%attr(755,root,root) %dir %{_var}/lib/katello-notification/cache
+%attr(755,root,root) %{_initrddir}/openstack-katello-notification
+%config(noreplace) %attr(644,root,root) %{_sysconfdir}/katello/katello-notification.conf
+
 
 
 %changelog
