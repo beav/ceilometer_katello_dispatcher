@@ -1,6 +1,8 @@
 from katello.client.api.system import SystemAPI
 from katello.client import server
 from katello.client.server import BasicAuthentication
+from ConfigParser import SafeConfigParser
+
 import logging
 
 log = logging.getLogger(__name__)
@@ -10,12 +12,27 @@ logging.basicConfig(level=logging.DEBUG)
 class Katello():
     def __init__(self):
         self.systemapi = SystemAPI()
-        s = server.KatelloServer("10.3.11.129", "443", "https", "/sam")
-        s.set_auth_method(BasicAuthentication('admin', 'admin'))
+        self._load_config()
+        log.info("connecting to %s://%s:%s%s" % (self.kt_scheme, self.kt_host, self.kt_port, self.kt_path))
+        s = server.KatelloServer(self.kt_host, self.kt_port, self.kt_scheme, self.kt_path)
+        s.set_auth_method(BasicAuthentication(self.kt_username, self.kt_password))
         server.set_active_server(s)
 
+    def _load_config(self):
+        CONFIG_FILENAME = '/etc/katello/katello-notification.conf'
+        conf = SafeConfigParser()
+        conf.readfp(open(CONFIG_FILENAME))
+        self.kt_host = conf.get('katello', 'host')
+        self.kt_port = conf.get('katello', 'port')
+        self.kt_scheme = conf.get('katello', 'scheme')
+        self.kt_path = conf.get('katello', 'path')
+        self.kt_org = conf.get('katello', 'default_org')
+        # this will be oauth in later versions of katello
+        self.kt_username = conf.get('katello', 'username')
+        self.kt_password = conf.get('katello', 'password')
+
     def find_hypervisor(self, hypervisor_hostname):
-        systems = self.systemapi.systems_by_org('ACME_Corporation', {'search': "network.hostname:%s" % hypervisor_hostname})
+        systems = self.systemapi.systems_by_org(self.kt_org, {'search': "network.hostname:%s" % hypervisor_hostname})
 
         if len(systems) > 1:
             log.error("found too many systems for %s, name is ambiguous" % hypervisor_hostname)

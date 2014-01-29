@@ -7,7 +7,7 @@ STYLEFILES=$(PYFILES)
 .PHONY: test cover
 
 cover:
-	nosetests --with-coverage --cover-package=ceilometer_katello_dispatcher --cover-inclusive .
+	nosetests --with-coverage --cover-package=katello_notification --cover-inclusive .
 test:
 	cd test && nosetests
 
