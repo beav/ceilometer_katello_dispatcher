@@ -7,7 +7,8 @@ from ceilometer.openstack.common.rpc import service as rpc_service
 from ceilometer.openstack.common import service as os_service
 from ceilometer import service
 
-from katello_notification.payload_actions import PayloadActions
+from katello_notification.katello_payload_actions import KatelloPayloadActions
+from katello_notification.spacewalk_payload_actions import SpacewalkPayloadActions
 import logging
 
 LOG = logging.getLogger(__name__)
@@ -41,11 +42,24 @@ class KatelloNotificationService(service.DispatchedService, rpc_service.Service)
     # this needs to be set, otherwise events will be stolen from ceilometer
     TOPIC_OVERRIDE = 'subscription_notifications.info'
 
+    def _katello_or_spacewalk(self):
+        CONFIG_FILENAME = '/etc/katello/katello-notification.conf'
+        conf = SafeConfigParser()
+        conf.readfp(open(CONFIG_FILENAME))
+        return conf.get('main', 'mgmt_server')
+
     def start(self):
         super(KatelloNotificationService, self).start()
         # Add a dummy thread to have wait() working
         self.tg.add_timer(604800, lambda: None)
-        self.payload_actions = PayloadActions()
+        mgmt_server = self._katello_or_spacewalk()
+
+        if mgmt_server == 'katello':
+            self.payload_actions = KatelloPayloadActions()
+        elif mgmt_server == 'spacewalk':
+            self.payload_actions = SpacewalkPayloadActions()
+        else:
+            log.error("mgmt server not set to 'katello' or 'spacewalk', aborting")
 
     def initialize_service_hook(self, service):
         '''Consumers must be declared before consume_thread start.'''
@@ -81,6 +95,7 @@ class KatelloNotificationService(service.DispatchedService, rpc_service.Service)
                    'error': ack_on_error})
 
         for exchange_topic in handler.get_exchange_topics(cfg.CONF):
+            LOG.info("exchange: %s" % exchange_topic.exchange)
             for topic in exchange_topic.topics:
                 topic = self.TOPIC_OVERRIDE
                 LOG.info("joining consumer pool for %r" % topic)
@@ -110,12 +125,11 @@ class KatelloNotificationService(service.DispatchedService, rpc_service.Service)
         # TODO: migration events
         try:
             if notification.get('event_type') == 'compute.instance.create.end':
-                hypervisor_consumer_uuid = self.payload_actions.find_or_create_hypervisor(notification.get('payload'))
-                self.payload_actions.find_or_create_hypervisor(notification.get('payload'))
-                self.payload_actions.create_guest_mapping(notification.get('payload'), hypervisor_consumer_uuid)
+                hypervisor_id = self.payload_actions.find_or_create_hypervisor(notification.get('payload'))
+                self.payload_actions.create_guest_mapping(notification.get('payload'), hypervisor_id)
             elif notification.get('event_type') == 'compute.instance.delete.end':
-                hypervisor_consumer_uuid = self.payload_actions.find_or_create_hypervisor(notification.get('payload'))
-                self.payload_actions.delete_guest_mapping(notification.get('payload'), hypervisor_consumer_uuid)
+                hypervisor_id = self.payload_actions.find_or_create_hypervisor(notification.get('payload'))
+                self.payload_actions.delete_guest_mapping(notification.get('payload'), hypervisor_id)
         except Exception, e:
             LOG.exception(e)
 

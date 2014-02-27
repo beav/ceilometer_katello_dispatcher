@@ -32,6 +32,9 @@ class Katello():
         self.kt_password = conf.get('katello', 'password')
 
     def find_hypervisor(self, hypervisor_hostname):
+        # TODO: use owner/{owner}/hypervisors, passing in hypervisor_id (aka hostname)
+        #   if no hypervisor, search by hostname
+        #   if no record, then optionally create a hypervisor type consumer and add hypervisor_id
         systems = self.systemapi.systems_by_org(self.kt_org, {'search': "network.hostname:%s" % hypervisor_hostname})
 
         if len(systems) > 1:
