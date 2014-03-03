@@ -8,7 +8,7 @@ logging.basicConfig(level=logging.DEBUG)
 HYPERVISOR_CACHE = '/var/lib/katello-notification/cache/hypervisors.json'
 
 
-class PayloadActions():
+class KatelloPayloadActions():
     """
     payload wrapper to handle foreman calls
     """
