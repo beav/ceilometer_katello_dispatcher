@@ -25,7 +25,7 @@ class Spacewalk():
     def _load_config(self):
         CONF = '/etc/katello/katello-notification.conf'
         conf = SafeConfigParser()
-        conf.readfp(open(CONFIG_FILENAME))
+        conf.readfp(open(CONF))
         self.sw_host = conf.get('spacewalk', 'host')
         self.sw_port = conf.get('spacewalk', 'port')
         self.sw_username = conf.get('spacewalk', 'username')
