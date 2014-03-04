@@ -12,46 +12,38 @@
 # http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt.
 
 from mock import MagicMock, patch
-from katello_notification.consumer_map import ConsumerMap
 import unittest
-from tempfile import NamedTemporaryFile
+from katello_notification.spacewalk_payload_actions import SpacewalkPayloadActions
 
 
-class TestConsumerMap(unittest.TestCase):
+class TestSpacewalkPayloadActions(unittest.TestCase):
 
-    def setUp(self):
-        self.temp_json = NamedTemporaryFile(delete=False)
-        self.consumer_map = ConsumerMap(self.temp_json.name)
+    @patch('katello_notification.spacewalk_wrapper.Spacewalk.__init__')
+    def setUp(self, spacewalk_init):
+        spacewalk_init.return_value = None
+        self.spacewalk_payload_actions = SpacewalkPayloadActions()
 
-    def test_no_hypervisor_found(self):
-        self.consumer_map = ConsumerMap('/unused/path/name')
-        self.assertRaises(KeyError, self.consumer_map.find_hypervisor_consumer_uuid, "some_hostname")
+    @patch('katello_notification.spacewalk_wrapper.Spacewalk.find_hypervisor')
+    def test_find_or_create_hypervisor_no_hyp(self, mock_find_hypervisor):
+        mock_find_hypervisor.return_value = None
+        self.assertRaises(RuntimeError,
+                          self.spacewalk_payload_actions.find_or_create_hypervisor,
+                          {"host": "unknown_hypervisor"})
 
-    @patch('katello_notification.consumer_map.ConsumerMap._load_consumer_map')
-    def test_hypervisor_found(self, mock_load_map):
-        mock_load_map.return_value = {'some_hostname': 'a575563c-7c8c-11e3-b6bd-40d7db0f677b'}
-        self.consumer_map = ConsumerMap('/unused/path/name')
-        self.assertEquals(self.consumer_map.find_hypervisor_consumer_uuid(local_identifier="some_hostname"), 'a575563c-7c8c-11e3-b6bd-40d7db0f677b')
+    @patch('katello_notification.spacewalk_wrapper.Spacewalk.find_hypervisor')
+    def test_find_or_create_hypervisor_found_hyp(self, mock_find_hypervisor):
+        mock_find_hypervisor.return_value = "1000001"
+        self.assertEquals("1000001", self.spacewalk_payload_actions.find_or_create_hypervisor({"host": "known_hypervisor"}))
 
-    @patch('katello_notification.consumer_map.ConsumerMap._save_consumer_map')
-    @patch('katello_notification.consumer_map.ConsumerMap._load_consumer_map')
-    def test_remove_hypervisor(self, mock_load_map, mock_save_map):
-        mock_load_map.return_value = {'some_hostname': 'a575563c-7c8c-11e3-b6bd-40d7db0f677b'}
-        self.consumer_map = ConsumerMap('/unused/path/name')
-        self.consumer_map.remove_hypervisor_consumer_uuid(local_identifier="some_hostname")
-        mock_save_map.assert_called_once_with(data={}, fname='/unused/path/name')
+    @patch('katello_notification.spacewalk_wrapper.Spacewalk.associate_guest')
+    def test_create_guest_mapping(self, mock_associate_guest):
+        self.spacewalk_payload_actions.create_guest_mapping({"instance_id": "A6A2B164-A2EB-11E3-828C-D749BDF4F982"},
+                                                            "CE223F92-A2EC-11E3-8C12-D749BDF4F982")
+        mock_associate_guest.assert_called_once_with("A6A2B164-A2EB-11E3-828C-D749BDF4F982", "CE223F92-A2EC-11E3-8C12-D749BDF4F982")
 
-    @patch('katello_notification.consumer_map.ConsumerMap._save_consumer_map')
-    @patch('katello_notification.consumer_map.ConsumerMap._load_consumer_map')
-    def test_add_hypervisor(self, mock_load_map, mock_save_map):
-        # confirm that we overwrite the existing uuid
-        mock_load_map.return_value = {'some_hostname': 'a575563c-7c8c-11e3-b6bd-40d7db0f677b'}
-        self.consumer_map = ConsumerMap('/unused/path/name')
-        self.consumer_map.add_hypervisor_consumer_uuid(local_identifier="some_hostname", hyp_uuid='9eddc386-7c91-11e3-99b6-40d7db0f677b')
-        mock_save_map.assert_called_once_with(data={'some_hostname': '9eddc386-7c91-11e3-99b6-40d7db0f677b'}, fname='/unused/path/name')
-
-        # confirm that we add a value now
-        self.consumer_map.add_hypervisor_consumer_uuid(local_identifier="some_hostname_two", hyp_uuid='3d07466c-7c9d-11e3-bba9-40d7db0f677b')
-        mock_save_map.assert_called_with(data={'some_hostname': '9eddc386-7c91-11e3-99b6-40d7db0f677b',
-                                               'some_hostname_two': '3d07466c-7c9d-11e3-bba9-40d7db0f677b'},
-                                         fname='/unused/path/name')
+    @patch('katello_notification.spacewalk_wrapper.Spacewalk.unassociate_guest')
+    def test_delete_guest_mapping(self, mock_unassociate_guest):
+        # note: this is fed through to the spacewalk wrapper, which no-ops
+        self.spacewalk_payload_actions.delete_guest_mapping({"instance_id": "A6A2B164-A2EB-11E3-828C-D749BDF4F982"},
+                                                            "CE223F92-A2EC-11E3-8C12-D749BDF4F982")
+        mock_unassociate_guest.assert_called_once_with("A6A2B164-A2EB-11E3-828C-D749BDF4F982", "CE223F92-A2EC-11E3-8C12-D749BDF4F982")
