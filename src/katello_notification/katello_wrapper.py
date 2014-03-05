@@ -71,7 +71,10 @@ class Katello():
         if guests and instance_uuid not in guests:
             guests.append(instance_uuid)
             params['guestIds'] = guests
-
+        elif guests and instance_uuid in guests:
+            # guest is already associated, no-op (this can happen from instance.exists messages)
+            log.debug("guest %s is already associated with hypervisor %s" % (instance_uuid, hypervisor_uuid))
+            return
         elif not guests:
             params['guestIds'] = [instance_uuid]
 
@@ -97,7 +100,7 @@ class Katello():
             guests.remove(instance_uuid)
             params['guestIds'] = guests
         else:
-            log.error("attempted to remove guest %s from list that does not contain entry" % instance_uuid)
+            log.debug("attempted to remove already-removed guest %s from hypervisor %s" % (instance_uuid, hypervisor_uuid))
             return
 
         log.info("sending guest list: %s" % params['guestIds'])

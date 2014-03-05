@@ -120,11 +120,21 @@ class KatelloNotificationService(service.DispatchedService, rpc_service.Service)
         bus, this method receives it. See _setup_subscription().
 
         """
-        LOG.info('notification %r', notification.get('event_type'))
+        LOG.debug('notification %r', notification.get('event_type'))
         # we only care about creates, deletes, and migrates
-        # TODO: migration events
+        # note: this will get cleaned up a bit when we move to oslo.messaging libs
         try:
-            if notification.get('event_type') == 'compute.instance.create.end':
+
+            # handle exists events
+            if notification.get('event_type') == 'compute.instance.exists':
+                if not notification.get('payload')['deleted_at']:
+                    hypervisor_id = self.payload_actions.find_or_create_hypervisor(notification.get('payload'))
+                    self.payload_actions.create_guest_mapping(notification.get('payload'), hypervisor_id)
+                else:
+                    hypervisor_id = self.payload_actions.find_or_create_hypervisor(notification.get('payload'))
+                    self.payload_actions.delete_guest_mapping(notification.get('payload'), hypervisor_id)
+            # handle creates and deletes
+            elif notification.get('event_type') == 'compute.instance.create.end':
                 hypervisor_id = self.payload_actions.find_or_create_hypervisor(notification.get('payload'))
                 self.payload_actions.create_guest_mapping(notification.get('payload'), hypervisor_id)
             elif notification.get('event_type') == 'compute.instance.delete.end':
