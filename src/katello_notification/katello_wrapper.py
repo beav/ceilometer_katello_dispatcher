@@ -54,9 +54,9 @@ class Katello():
         this method has a race condition, since it grabs the guest list, then sends an updated version.
         """
 
-        log.info("finding system record for %s" % hypervisor_uuid)
+        log.debug("finding system record for hypervisor %s" % hypervisor_uuid)
         system = self.systemapi.system(hypervisor_uuid)
-        log.info("existing guest list: %s" % system['guestIds'])
+        log.debug("existing guest list: %s" % system['guestIds'])
 
         # the data that "update" expects is different than what is pulled down
         params = {}
@@ -82,9 +82,9 @@ class Katello():
         self.systemapi.update(hypervisor_uuid, params)
 
     def unassociate_guest(self, instance_uuid, hypervisor_uuid):
-        log.info("finding system record for %s" % hypervisor_uuid)
+        log.debug("finding system record for hypervisor %s" % hypervisor_uuid)
         system = self.systemapi.system(hypervisor_uuid)
-        log.info("existing guest list: %s" % system['guestIds'])
+        log.debug("existing guest list: %s" % system['guestIds'])
 
         # the data that "update" expects is different than what is pulled down
         params = {}

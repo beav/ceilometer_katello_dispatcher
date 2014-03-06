@@ -120,24 +120,27 @@ class KatelloNotificationService(service.DispatchedService, rpc_service.Service)
         bus, this method receives it. See _setup_subscription().
 
         """
-        LOG.debug('notification %r', notification.get('event_type'))
         # we only care about creates, deletes, and migrates
         # note: this will get cleaned up a bit when we move to oslo.messaging libs
         try:
 
             # handle exists events
             if notification.get('event_type') == 'compute.instance.exists':
-                if not notification.get('payload')['deleted_at']:
-                    hypervisor_id = self.payload_actions.find_or_create_hypervisor(notification.get('payload'))
-                    self.payload_actions.create_guest_mapping(notification.get('payload'), hypervisor_id)
-                else:
+                if notification.get('payload')['state'] == 'deleted':
+                    LOG.debug("received instance.exists deletion event")
                     hypervisor_id = self.payload_actions.find_or_create_hypervisor(notification.get('payload'))
                     self.payload_actions.delete_guest_mapping(notification.get('payload'), hypervisor_id)
+                else:
+                    LOG.debug("received instance.exists event")
+                    hypervisor_id = self.payload_actions.find_or_create_hypervisor(notification.get('payload'))
+                    self.payload_actions.create_guest_mapping(notification.get('payload'), hypervisor_id)
             # handle creates and deletes
             elif notification.get('event_type') == 'compute.instance.create.end':
+                LOG.debug("received instance.create.end event")
                 hypervisor_id = self.payload_actions.find_or_create_hypervisor(notification.get('payload'))
                 self.payload_actions.create_guest_mapping(notification.get('payload'), hypervisor_id)
             elif notification.get('event_type') == 'compute.instance.delete.end':
+                LOG.debug("received instance.delete.end event")
                 hypervisor_id = self.payload_actions.find_or_create_hypervisor(notification.get('payload'))
                 self.payload_actions.delete_guest_mapping(notification.get('payload'), hypervisor_id)
         except Exception, e:
