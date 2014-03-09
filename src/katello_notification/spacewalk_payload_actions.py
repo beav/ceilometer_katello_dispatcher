@@ -20,8 +20,6 @@ class SpacewalkPayloadActions():
 
     def find_or_create_hypervisor(self, payload):
         hyp_host = payload.get('host')
-        # look up hypervisor in hypervisor hostname/systemid dict
-        log.info("hypervisor system for %s not found locally, looking in spacewalk for record" % hyp_host)
         hyp_system_id = self.spacewalk.find_hypervisor(hyp_host)
         if not hyp_system_id:
             log.error("no hypervisor found for %s - perhaps it needs to be registered to spacewalk?" % hyp_host)
