@@ -16,7 +16,7 @@ class KatelloPayloadActions():
 
     def find_or_create_hypervisor(self, payload):
         hyp_host = payload.get('host')
-        log.info("looking for hypervisor consumer record for for %s" % hyp_host)
+        log.debug("looking for hypervisor consumer record for for %s" % hyp_host)
         hyp_consumer_uuid = self.katello.find_hypervisor(hyp_host)
         if not hyp_consumer_uuid:
             log.error("no hypervisor found for %s" % hyp_host)
@@ -26,7 +26,7 @@ class KatelloPayloadActions():
 
     def create_guest_mapping(self, payload, hypervisor_consumer_uuid):
         instance_id = payload.get('instance_id')
-        log.debug("associating guest %s with hypervisor %s" % (instance_id, hypervisor_consumer_uuid))
+        log.info("associating guest %s with hypervisor %s" % (instance_id, hypervisor_consumer_uuid))
         self.katello.associate_guest(instance_id, hypervisor_consumer_uuid)
 
     def delete_guest_mapping(self, payload, hypervisor_consumer_uuid):
