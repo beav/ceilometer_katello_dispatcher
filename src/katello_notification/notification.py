@@ -1,6 +1,7 @@
 #!/usr/bin/python
 from oslo.config import cfg
 from stevedore import extension
+from ConfigParser import SafeConfigParser
 
 from ceilometer.openstack.common.gettextutils import _  # noqa
 from ceilometer.openstack.common.rpc import service as rpc_service
