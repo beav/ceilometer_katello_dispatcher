@@ -1,5 +1,5 @@
 Name: katello_notification
-Version: 0.0.7
+Version: 0.0.8
 Release: 1%{?dist}
 
 Summary: A daemon to read events off of the openstack messagebus and feed into katello
@@ -52,6 +52,16 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Sun Mar 09 2014 Chris Duryee <cduryee@redhat.com> 0.0.8-1
+- clean up logging a bit (cduryee@redhat.com)
+- remove consumer cache (cduryee@redhat.com)
+- logging cleanup, and look for message state for deletes (cduryee@redhat.com)
+- handle "exists" messages (cduryee@redhat.com)
+- initial spacewalk support (cduryee@redhat.com)
+- use conf file instead of hardcoded katello (cduryee@redhat.com)
+- pep8 fixups (cduryee@redhat.com)
+- big refactor (cduryee@redhat.com)
+
 * Tue Jan 14 2014 Chris Duryee <cduryee@redhat.com> 0.0.7-1
 - fix spec typo (cduryee@redhat.com)
 
