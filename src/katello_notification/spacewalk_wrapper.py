@@ -76,17 +76,28 @@ class Spacewalk():
 
         return events
 
+    def _get_guest_uuid_list(self, sid):
+        guest_list = self.rpcserver.system.listVirtualGuests(self.key, sid)
+        # strip the list to just the UUIDs
+        uuids = map(lambda x: x['uuid'], guest_list)
+        log.debug("guest list for %s: %s" % (sid, uuids))
+        return uuids
+
     def associate_guest(self, instance_uuid, hypervisor_system_id):
         """
         important note: spacewalk does not ever delete guest records, see
         https://git.fedorahosted.org/cgit/spacewalk.git/tree/backend/server/rhnVirtualization.py#n263
 
-        We can take advantage of this to avoid a race condition, by not asking
-        for the guest list before posting a new guest.
+        We can take advantage of this to avoid a race condition, since two
+        concurrent runs of associate_guest will not clobber each other's plan. At worst,
+        the "losing" guest list will have one item marked as "stopped" incorrectly.
+
         """
 
+        guest_list = self._get_guest_uuid_list(hypervisor_system_id)
+        guest_list.append(instance_uuid)
         #TODO: look up hypervisor info here to make plan more detailed?
-        plan = self._assemble_plan([instance_uuid], hypervisor_system_id)
+        plan = self._assemble_plan(guest_list, hypervisor_system_id)
         log.debug("sending plan %s" % plan)
         systemid = self.rpcserver.system.downloadSystemId(self.key, hypervisor_system_id)
         self.xmlrpcserver.registration.virt_notify(systemid, plan)

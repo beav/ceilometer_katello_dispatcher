@@ -47,11 +47,16 @@ class StubServer():
     def _system_downloadSystemId(self, unused1, unused2):
         return "some_id"
 
+    def _system_listVirtualGuests(self, unused1, unused2):
+        return [{"uuid": "3F6403F6-A88E-11E3-BCC6-161DBDF4F982"},
+                {"uuid": "4AA0D2EE-A88E-11E3-8997-161DBDF4F982"}]
+
     def __init__(self):
         self.auth = self.StubObj()
         self.auth.login = self._auth_login
         self.system = self.StubObj()
         self.system.downloadSystemId = self._system_downloadSystemId
+        self.system.listVirtualGuests = self._system_listVirtualGuests
         self.system.search = self.StubObj()
         self.system.search.hostname = self._system_search_hostname
         self.registration = self.StubObj()
