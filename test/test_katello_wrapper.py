@@ -18,6 +18,23 @@ from katello_notification.katello_wrapper import Katello
 import StringIO
 
 TEST_CONFIG = """
+[main]
+autoregister_hypervisors = false
+
+[katello]
+host = some.hostname
+port = 443
+scheme = https
+path = /sam
+default_org = ACME_Corporation
+username = admin
+password = admin
+"""
+
+TEST_CONFIG_AUTOREGISTER = """
+[main]
+autoregister_hypervisors = true
+
 [katello]
 host = some.hostname
 port = 443
@@ -49,6 +66,33 @@ class TestKatelloWrapper(unittest.TestCase):
         # test 1 hypervisor found
         mock_systems_by_org.return_value = [{'uuid': '4ced494a-884c-11e3-aa46-ce96db0f677b'}]
         self.assertEquals(self.kw.find_hypervisor('fake_hypervisor_hostname'), '4ced494a-884c-11e3-aa46-ce96db0f677b')
+
+    @patch('__builtin__.open')
+    @patch('katello.client.api.system.SystemAPI.register')
+    @patch('katello.client.api.system.SystemAPI.checkin')
+    @patch('katello.client.api.system.SystemAPI.systems_by_org')
+    def test_katello_find_hypervisor_autoregister(self, mock_systems_by_org, mock_checkin, mock_register, mock_open):
+
+        # use a different katello_wrapper
+        old_kw = self.kw
+        mock_open.return_value = StringIO.StringIO(TEST_CONFIG_AUTOREGISTER)
+        self.kw = Katello()
+
+        # test no hypervisors found, create a hypervisor
+        mock_systems_by_org.return_value = []
+        mock_register.return_value = {"uuid": '2AAFE962-AB8A-11E3-A989-0DFFF048AC65'}
+        self.assertEquals(self.kw.find_hypervisor('fake_hypervisor_hostname'), '2AAFE962-AB8A-11E3-A989-0DFFF048AC65')
+
+        # test >1 hypervisors found
+        mock_systems_by_org.return_value = ['hyper1', 'hyper2']
+        self.assertEquals(self.kw.find_hypervisor('fake_hypervisor_hostname'), None)
+
+        # test 1 hypervisor found
+        mock_systems_by_org.return_value = [{'uuid': '4ced494a-884c-11e3-aa46-ce96db0f677b'}]
+        self.assertEquals(self.kw.find_hypervisor('fake_hypervisor_hostname'), '4ced494a-884c-11e3-aa46-ce96db0f677b')
+
+        # reload old config
+        self.kw = old_kw
 
     @patch('katello.client.api.system.SystemAPI.system')
     @patch('katello.client.api.system.SystemAPI.update')
