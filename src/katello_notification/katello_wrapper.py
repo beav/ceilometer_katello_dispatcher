@@ -17,6 +17,10 @@ class Katello():
         s = server.KatelloServer(self.kt_host, self.kt_port, self.kt_scheme, self.kt_path)
         s.set_auth_method(BasicAuthentication(self.kt_username, self.kt_password))
         server.set_active_server(s)
+        if self.autoregister_hypervisors:
+            log.info("hypervisor autoregistration is enabled")
+        else:
+            log.info("hypervisor autoregistration is disabled")
 
     def _load_config(self):
         CONFIG_FILENAME = '/etc/katello/katello-notification.conf'
@@ -30,6 +34,15 @@ class Katello():
         # this will be oauth in later versions of katello
         self.kt_username = conf.get('katello', 'username')
         self.kt_password = conf.get('katello', 'password')
+        self.autoregister_hypervisors = conf.getboolean('main', 'autoregister_hypervisors')
+
+    def _create_hypervisor(self, hypervisor_hostname):
+        facts = {"network.hostname": hypervisor_hostname}
+        consumer = self.systemapi.register(name=hypervisor_hostname, org=self.kt_org, environment_id=None,
+                                           facts=facts, activation_keys=None, cp_type='hypervisor',
+                                           installed_products=None)
+        self.systemapi.checkin(consumer['uuid'])
+        return consumer['uuid']
 
     def find_hypervisor(self, hypervisor_hostname):
         # TODO: use owner/{owner}/hypervisors, passing in hypervisor_id (aka hostname)
@@ -41,8 +54,14 @@ class Katello():
             log.error("found too many systems for %s, name is ambiguous" % hypervisor_hostname)
             return
         if len(systems) == 0:
-            log.error("found zero systems for %s" % hypervisor_hostname)
-            return
+            if self.autoregister_hypervisors:
+                log.info("found zero systems for %s, creating hypervisor" % hypervisor_hostname)
+                consumer_uuid = self._create_hypervisor(hypervisor_hostname)
+                log.info("hypervisor record created for %s, consumer uuid %s" % (hypervisor_hostname, consumer_uuid))
+                return consumer_uuid
+            else:
+                log.error("found zero systems for %s" % hypervisor_hostname)
+                return
 
         log.info("found %s for hostname %s!" % (systems[0]['uuid'], hypervisor_hostname))
         return systems[0]['uuid']
