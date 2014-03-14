@@ -19,8 +19,12 @@ class Spacewalk():
         except Exception:
             raise SpacewalkError("Unable to connect to the spacewalk server")
             log.error("unable to connect to spacewalk server")
-        self.key = self.rpcserver.auth.login('admin', 'nimda')
+        self.key = self.rpcserver.auth.login(self.sw_username, self.sw_password)
         log.info("Initialized spacewalk connection")
+        if self.autoregister_hypervisors:
+            log.info("hypervisor autoregistration is enabled")
+        else:
+            log.info("hypervisor autoregistration is disabled")
 
     def _load_config(self):
         CONF = '/etc/katello/katello-notification.conf'
@@ -30,16 +34,50 @@ class Spacewalk():
         self.sw_port = conf.get('spacewalk', 'port')
         self.sw_username = conf.get('spacewalk', 'username')
         self.sw_password = conf.get('spacewalk', 'password')
+        self.autoregister_hypervisors = conf.getboolean('main', 'autoregister_hypervisors')
+
+    def _create_hypervisor(self, hypervisor_hostname):
+
+        log.debug("creating new system in spacewalk")
+        new_system = self.xmlrpcserver.registration.new_system_user_pass(hypervisor_hostname,
+                        "unknown", "6Server", "x86_64", self.sw_username, self.sw_password, {})
+        self.xmlrpcserver.registration.refresh_hw_profile(new_system['system_id'], [])
+        log.debug("done creating new system in spacewalk, parsing systemid from xml: %s" % new_system['system_id'])
+        # a bit obtuse, but done the same way in rhn client tools (the '3:' strips the 'ID-')
+        system_id = xmlrpclib.loads(new_system['system_id'])[0][0]['system_id'][3:]
+        # make sure we get an int here, not the str
+        return system_id
 
     def find_hypervisor(self, hypervisor_hostname):
         """
         returns a system ID based on hostname, returns None if no hypervisor is found
         """
-        result = self.rpcserver.system.search.hostname(self.key, hypervisor_hostname)
-        log.info(result)
+        # We are using hypervisor hostname as profile name, to avoid querying lucene.
+        # Lucene searches were causing race conditions where we'd create a hypervisor in one thread,
+        # then search for it in another and fail, and re-create.
+
+        # beware! there is still a race condition here! We can query in 2
+        # threads for the ID and create the system profile twice. Avoiding
+        # lucene just tightens the window but does not remove it.
+
+        #XXX: HORRIBLE HACK HERE! need to figure out how to make spacewalk reject duplicate registrations
+        import time
+        import random
+        sleeptime = random.randint(0, 20)
+        log.info("sleeping for %s" % sleeptime)
+        time.sleep(sleeptime)
+        # end of hack
+
+        result = self.rpcserver.system.getId(self.key, hypervisor_hostname)
+        if len(result) == 0 and self.autoregister_hypervisors:
+            log.info("no hypervisor found for %s, creating new record in spacewalk" % hypervisor_hostname)
+            system_id = self._create_hypervisor(hypervisor_hostname)
+            log.info("created systemid %s for new hypervisor %s" % (system_id, hypervisor_hostname))
+            return system_id
         if len(result) > 1:
-            raise RuntimeError("more than one system record found for hostname %s" % hypervisor_hostname)
+            raise RuntimeError("more than one system record found for profile name %s. Please remove extraneous system records in spacewalk." % hypervisor_hostname)
         if len(result) == 1:
+            log.info("found system %s for hostname %s" % (result[0]['id'], hypervisor_hostname))
             return result[0]['id']
 
     def _assemble_plan(self, guests, hypervisor_name):
@@ -77,7 +115,7 @@ class Spacewalk():
         return events
 
     def _get_guest_uuid_list(self, sid):
-        guest_list = self.rpcserver.system.listVirtualGuests(self.key, sid)
+        guest_list = self.rpcserver.system.listVirtualGuests(self.key, int(sid))
         # strip the list to just the UUIDs
         uuids = map(lambda x: x['uuid'], guest_list)
         log.debug("guest list for %s: %s" % (sid, uuids))
@@ -93,13 +131,13 @@ class Spacewalk():
         the "losing" guest list will have one item marked as "stopped" incorrectly.
 
         """
-
+        log.debug("searching for guest uuids for %s" % hypervisor_system_id)
         guest_list = self._get_guest_uuid_list(hypervisor_system_id)
         guest_list.append(instance_uuid)
         #TODO: look up hypervisor info here to make plan more detailed?
         plan = self._assemble_plan(guest_list, hypervisor_system_id)
         log.debug("sending plan %s" % plan)
-        systemid = self.rpcserver.system.downloadSystemId(self.key, hypervisor_system_id)
+        systemid = self.rpcserver.system.downloadSystemId(self.key, int(hypervisor_system_id))
         self.xmlrpcserver.registration.virt_notify(systemid, plan)
 
     def unassociate_guest(self, instance_uuid, hypervisor_uuid):
