@@ -46,7 +46,7 @@ class Spacewalk():
         # a bit obtuse, but done the same way in rhn client tools (the '3:' strips the 'ID-')
         system_id = xmlrpclib.loads(new_system['system_id'])[0][0]['system_id'][3:]
         # make sure we get an int here, not the str
-        return int(system_id)
+        return system_id
 
     def find_hypervisor(self, hypervisor_hostname):
         """
@@ -63,7 +63,7 @@ class Spacewalk():
         #XXX: HORRIBLE HACK HERE! need to figure out how to make spacewalk reject duplicate registrations
         import time
         import random
-        sleeptime = random.randint(0,20)
+        sleeptime = random.randint(0, 20)
         log.info("sleeping for %s" % sleeptime)
         time.sleep(sleeptime)
         # end of hack
@@ -115,7 +115,7 @@ class Spacewalk():
         return events
 
     def _get_guest_uuid_list(self, sid):
-        guest_list = self.rpcserver.system.listVirtualGuests(self.key, sid)
+        guest_list = self.rpcserver.system.listVirtualGuests(self.key, int(sid))
         # strip the list to just the UUIDs
         uuids = map(lambda x: x['uuid'], guest_list)
         log.debug("guest list for %s: %s" % (sid, uuids))
@@ -137,7 +137,7 @@ class Spacewalk():
         #TODO: look up hypervisor info here to make plan more detailed?
         plan = self._assemble_plan(guest_list, hypervisor_system_id)
         log.debug("sending plan %s" % plan)
-        systemid = self.rpcserver.system.downloadSystemId(self.key, hypervisor_system_id)
+        systemid = self.rpcserver.system.downloadSystemId(self.key, int(hypervisor_system_id))
         self.xmlrpcserver.registration.virt_notify(systemid, plan)
 
     def unassociate_guest(self, instance_uuid, hypervisor_uuid):
