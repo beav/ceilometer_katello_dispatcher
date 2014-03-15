@@ -38,24 +38,35 @@ class Spacewalk():
 
     def _create_hypervisor(self, hypervisor_hostname):
 
-        hw_profile = {'class': 'NETINFO', 'hostname': hypervisor_hostname}
+        log.debug("creating new system in spacewalk")
         new_system = self.xmlrpcserver.registration.new_system_user_pass(hypervisor_hostname,
                         "unknown", "6Server", "x86_64", self.sw_username, self.sw_password, {})
-        self.xmlrpcserver.registration.refresh_hw_profile(new_system['system_id'], hw_profile)
-        return new_system['system_id']
+        self.xmlrpcserver.registration.refresh_hw_profile(new_system['system_id'], [])
+        log.debug("done creating new system in spacewalk, parsing systemid from xml: %s" % new_system['system_id'])
+        # a bit obtuse, but done the same way in rhn client tools (the '3:' strips the 'ID-')
+        system_id = xmlrpclib.loads(new_system['system_id'])[0][0]['system_id'][3:]
+        return system_id
 
     def find_hypervisor(self, hypervisor_hostname):
         """
         returns a system ID based on hostname, returns None if no hypervisor is found
         """
-        result = self.rpcserver.system.search.hostname(self.key, hypervisor_hostname)
+        # We are using hypervisor hostname as profile name, to avoid querying lucene.
+        # Lucene searches were causing race conditions where we'd create a hypervisor in one thread,
+        # then search for it in another and fail, and re-create.
+
+        # beware! there is still a race condition here! We can query in 2
+        # threads for the ID and create the system profile twice. Avoiding
+        # lucene just tightens the window but does not remove it.
+
+        result = self.rpcserver.system.getId(self.key, hypervisor_hostname)
         if len(result) == 0 and self.autoregister_hypervisors:
             log.info("no hypervisor found for %s, creating new record in spacewalk" % hypervisor_hostname)
             system_id = self._create_hypervisor(hypervisor_hostname)
             log.info("created systemid %s for new hypervisor %s" % (system_id, hypervisor_hostname))
             return system_id
         if len(result) > 1:
-            raise RuntimeError("more than one system record found for hostname %s" % hypervisor_hostname)
+            raise RuntimeError("more than one system record found for profile name %s. Please remove extraneous system records in spacewalk." % hypervisor_hostname)
         if len(result) == 1:
             log.info("found system %s for hostname %s" % (result[0]['id'], hypervisor_hostname))
             return result[0]['id']

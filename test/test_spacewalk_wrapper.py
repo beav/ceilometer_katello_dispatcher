@@ -41,6 +41,12 @@ username = admin
 password = admin
 """
 
+#this is missing unused values
+TEST_SYSID = {"system_id": '<?xml version="1.0"?><params><param><value>' +
+                           '<struct><member><name>system_id</name><value>' +
+                           '<string>ID-1000010007</string></value></member>' +
+                           '</struct></value></param></params>'}
+
 
 class StubServer():
     """
@@ -52,9 +58,7 @@ class StubServer():
 
     def _registration_new_system_user_pass(self, unused1, unused2, unused3,
                                            unused4, unused5, unused6, unused7):
-        system = {}
-        system['system_id'] = '9876'
-        return system
+        return TEST_SYSID
 
     def _registration_refresh_hw_profile(self, unused1, unused2):
         return
@@ -65,7 +69,7 @@ class StubServer():
     def _registration_virt_notify(self, unused1, unused2):
         return
 
-    def _system_search_hostname(self, unused1, unused2):
+    def _system_getId(self, unused1, unused2):
         return self.sshr
 
     def _system_downloadSystemId(self, unused1, unused2):
@@ -81,14 +85,13 @@ class StubServer():
         self.system = self.StubObj()
         self.system.downloadSystemId = self._system_downloadSystemId
         self.system.listVirtualGuests = self._system_listVirtualGuests
-        self.system.search = self.StubObj()
-        self.system.search.hostname = self._system_search_hostname
+        self.system.getId = self._system_getId
         self.registration = self.StubObj()
         self.registration.new_system_user_pass = self._registration_new_system_user_pass
         self.registration.refresh_hw_profile = self._registration_refresh_hw_profile
         self.registration.virt_notify = self._registration_virt_notify
 
-    def set_system_search_hostname_result(self, res):
+    def set_system_get_id_result(self, res):
         self.sshr = res
 
 
@@ -103,13 +106,13 @@ class TestSpacewalkWrapper(unittest.TestCase):
         self.sw = Spacewalk()
 
     def test_spacewalk_find_hypervisor(self):
-        self.stubserver.set_system_search_hostname_result([])
+        self.stubserver.set_system_get_id_result([])
         self.assertEquals(None, self.sw.find_hypervisor('unknown_hostname'))
 
-        self.stubserver.set_system_search_hostname_result(["sys1", "sys2"])
+        self.stubserver.set_system_get_id_result(["sys1", "sys2"])
         self.assertRaises(RuntimeError, self.sw.find_hypervisor, 'multi_match_hostname')
 
-        self.stubserver.set_system_search_hostname_result([{'id': '1234'}])
+        self.stubserver.set_system_get_id_result([{'id': '1234'}])
         self.assertEquals('1234', self.sw.find_hypervisor('single_match_hostname'))
 
     @patch('xmlrpclib.Server')
@@ -124,13 +127,13 @@ class TestSpacewalkWrapper(unittest.TestCase):
         mock_xmlrpclib.return_value = self.stubserver
         self.sw = Spacewalk()
 
-        self.stubserver.set_system_search_hostname_result([])
-        self.assertEquals('9876', self.sw.find_hypervisor('unknown_hostname'))
+        self.stubserver.set_system_get_id_result([])
+        self.assertEquals('1000010007', self.sw.find_hypervisor('unknown_hostname'))
 
-        self.stubserver.set_system_search_hostname_result(["sys1", "sys2"])
+        self.stubserver.set_system_get_id_result(["sys1", "sys2"])
         self.assertRaises(RuntimeError, self.sw.find_hypervisor, 'multi_match_hostname')
 
-        self.stubserver.set_system_search_hostname_result([{'id': '1234'}])
+        self.stubserver.set_system_get_id_result([{'id': '1234'}])
         self.assertEquals('1234', self.sw.find_hypervisor('single_match_hostname'))
 
         self.sw = old_sw
