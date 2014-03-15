@@ -19,7 +19,7 @@ class Spacewalk():
         except Exception:
             raise SpacewalkError("Unable to connect to the spacewalk server")
             log.error("unable to connect to spacewalk server")
-        self.key = self.rpcserver.auth.login('admin', 'nimda')
+        self.key = self.rpcserver.auth.login(self.sw_username, self.sw_password)
         log.info("Initialized spacewalk connection")
         if self.autoregister_hypervisors:
             log.info("hypervisor autoregistration is enabled")
