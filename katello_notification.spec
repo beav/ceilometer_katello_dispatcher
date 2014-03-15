@@ -1,5 +1,5 @@
 Name: katello_notification
-Version: 0.0.8
+Version: 0.0.9
 Release: 1%{?dist}
 
 Summary: A daemon to read events off of the openstack messagebus and feed into katello
@@ -52,6 +52,14 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Sat Mar 15 2014 Chris Duryee <cduryee@redhat.com> 0.0.9-1
+- hack for registration race condition, and convert str to int
+  (cduryee@redhat.com)
+- use profile name instead of hostname (cduryee@redhat.com)
+- autoregistration of spacewalk hypervisors (cduryee@redhat.com)
+- support autoregistration of hypervisors (cduryee@redhat.com)
+- pull list of guests from SW before pushing new guest (cduryee@redhat.com)
+
 * Sun Mar 09 2014 Chris Duryee <cduryee@redhat.com> 0.0.8-1
 - clean up logging a bit (cduryee@redhat.com)
 - remove consumer cache (cduryee@redhat.com)
