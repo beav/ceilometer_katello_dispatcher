@@ -45,7 +45,8 @@ class Spacewalk():
         log.debug("done creating new system in spacewalk, parsing systemid from xml: %s" % new_system['system_id'])
         # a bit obtuse, but done the same way in rhn client tools (the '3:' strips the 'ID-')
         system_id = xmlrpclib.loads(new_system['system_id'])[0][0]['system_id'][3:]
-        return system_id
+        # make sure we get an int here, not the str
+        return int(system_id)
 
     def find_hypervisor(self, hypervisor_hostname):
         """
@@ -58,6 +59,14 @@ class Spacewalk():
         # beware! there is still a race condition here! We can query in 2
         # threads for the ID and create the system profile twice. Avoiding
         # lucene just tightens the window but does not remove it.
+
+        #XXX: HORRIBLE HACK HERE! need to figure out how to make spacewalk reject duplicate registrations
+        import time
+        import random
+        sleeptime = random.randint(0,20)
+        log.info("sleeping for %s" % sleeptime)
+        time.sleep(sleeptime)
+        # end of hack
 
         result = self.rpcserver.system.getId(self.key, hypervisor_hostname)
         if len(result) == 0 and self.autoregister_hypervisors:
@@ -122,7 +131,7 @@ class Spacewalk():
         the "losing" guest list will have one item marked as "stopped" incorrectly.
 
         """
-
+        log.debug("searching for guest uuids for %s" % hypervisor_system_id)
         guest_list = self._get_guest_uuid_list(hypervisor_system_id)
         guest_list.append(instance_uuid)
         #TODO: look up hypervisor info here to make plan more detailed?
