@@ -21,6 +21,10 @@ class Spacewalk():
             log.error("unable to connect to spacewalk server")
         self.key = self.rpcserver.auth.login('admin', 'nimda')
         log.info("Initialized spacewalk connection")
+        if self.autoregister_hypervisors:
+            log.info("hypervisor autoregistration is enabled")
+        else:
+            log.info("hypervisor autoregistration is disabled")
 
     def _load_config(self):
         CONF = '/etc/katello/katello-notification.conf'
@@ -30,16 +34,30 @@ class Spacewalk():
         self.sw_port = conf.get('spacewalk', 'port')
         self.sw_username = conf.get('spacewalk', 'username')
         self.sw_password = conf.get('spacewalk', 'password')
+        self.autoregister_hypervisors = conf.getboolean('main', 'autoregister_hypervisors')
+
+    def _create_hypervisor(self, hypervisor_hostname):
+
+        hw_profile = {'class': 'NETINFO', 'hostname': hypervisor_hostname}
+        new_system = self.xmlrpcserver.registration.new_system_user_pass(hypervisor_hostname,
+                        "unknown", "6Server", "x86_64", self.sw_username, self.sw_password, {})
+        self.xmlrpcserver.registration.refresh_hw_profile(new_system['system_id'], hw_profile)
+        return new_system['system_id']
 
     def find_hypervisor(self, hypervisor_hostname):
         """
         returns a system ID based on hostname, returns None if no hypervisor is found
         """
         result = self.rpcserver.system.search.hostname(self.key, hypervisor_hostname)
-        log.info(result)
+        if len(result) == 0 and self.autoregister_hypervisors:
+            log.info("no hypervisor found for %s, creating new record in spacewalk" % hypervisor_hostname)
+            system_id = self._create_hypervisor(hypervisor_hostname)
+            log.info("created systemid %s for new hypervisor %s" % (system_id, hypervisor_hostname))
+            return system_id
         if len(result) > 1:
             raise RuntimeError("more than one system record found for hostname %s" % hypervisor_hostname)
         if len(result) == 1:
+            log.info("found system %s for hostname %s" % (result[0]['id'], hypervisor_hostname))
             return result[0]['id']
 
     def _assemble_plan(self, guests, hypervisor_name):
