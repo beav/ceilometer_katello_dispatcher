@@ -1,3 +1,4 @@
+%global use_systemd (0%{?fedora} && 0%{?fedora} >= 17) || (0%{?rhel} && 0%{?rhel} >= 7)
 Name: katello_notification
 Version: 0.0.9
 Release: 1%{?dist}
@@ -10,11 +11,25 @@ URL: http://github.com/Katello/katello_notification
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch: noarch
 
-# needs to be version after uuid merge
+%if %use_systemd
+Requires(post): systemd
+Requires(preun): systemd
+Requires(postun): systemd
+%else
+Requires(post): chkconfig
+Requires(preun): chkconfig
+Requires(preun): initscripts
+Requires(postun): initscripts
+%endif
+
 Requires: katello-cli-common
 Requires: python-ceilometer >= 2013.2
 
 BuildRequires: python-setuptools
+%if %use_systemd
+# We need the systemd RPM macros
+BuildRequires: systemd
+%endif
 
 %description
 A daemon to read events off of the openstack messagebus and feed into katello
@@ -28,9 +43,40 @@ A daemon to read events off of the openstack messagebus and feed into katello
 %install
 rm -rf %{buildroot}
 %{__python} setup.py install --skip-build --root %{buildroot}
-install -D bin/openstack-katello-notification %{buildroot}/etc/rc.d/init.d/openstack-katello-notification
+%if %use_systemd
+    install -d -m 755 %{buildroot}/%{_unitdir}
+    install -m 644 %{name}.service %{buildroot}/%{_unitdir}/%{name}.service
+%else
+    install -D bin/openstack-katello-notification %{buildroot}/etc/rc.d/init.d/openstack-katello-notification
+%endif
 install -D bin/katello-notification %{buildroot}/usr/bin/katello-notification
 install -D etc/katello-notification.conf %{buildroot}/etc/katello/katello-notification.conf
+
+%post
+%if %use_systemd
+    %systemd_post %{name}.service
+%else
+    /sbin/chkconfig --add %{name}
+%endif
+
+%preun
+%if %use_systemd
+    %systemd_preun %{name}.service
+%else
+    if [ $1 -eq 0 ] ; then
+        /sbin/service openstack-katello-notification stop >/dev/null 2>&1
+        /sbin/chkconfig --del openstack-katello-notification
+    fi
+%endif
+
+%postun
+%if %use_systemd
+    %systemd_postun_with_restart %{name}.service
+%else
+    if [ "$1" -ge "1" ] ; then
+        /sbin/service openstack-katello-notification condrestart >/dev/null 2>&1 || :
+    fi
+%endif
 
 %clean
 rm -rf %{buildroot}
@@ -40,14 +86,16 @@ rm -rf %{buildroot}
 %doc README.md
 
 %dir %{python_sitelib}/katello_notification
-
 %{python_sitelib}/katello_notification/*
 %{python_sitelib}/katello_notification-*.egg-info
-
-%attr(755,root,root) %{_initrddir}/openstack-katello-notification
 %attr(755,root,root) %{_bindir}/katello-notification
-%attr(755,root,root) %{_initrddir}/openstack-katello-notification
+%if %use_systemd
+    %attr(644,root,root) %{_unitdir}/%{name}.service
+%else
+    %attr(755,root,root) %{_initrddir}/openstack-katello-notification
+%endif
 %config(noreplace) %attr(644,root,root) %{_sysconfdir}/katello/katello-notification.conf
+
 
 
 

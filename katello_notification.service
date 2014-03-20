@@ -1,0 +1,11 @@
+[Unit]
+Description=katello_notification service to interact with Katello or Spacewalk for host/guest events
+After=syslog.target network.target
+
+[Service]
+Type=simple
+User=ceilometer
+ExecStart=/usr/bin/katello-notification --logfile /var/log/ceilometer/katello-notification.log
+
+[Install]
+WantedBy=multi-user.target
