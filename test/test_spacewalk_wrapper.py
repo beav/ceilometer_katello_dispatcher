@@ -105,7 +105,9 @@ class TestSpacewalkWrapper(unittest.TestCase):
         mock_xmlrpclib.return_value = self.stubserver
         self.sw = Spacewalk()
 
-    def test_spacewalk_find_hypervisor(self):
+    @patch('xmlrpclib.Server')
+    def test_spacewalk_find_hypervisor(self, mock_xmlrpclib):
+        mock_xmlrpclib.return_value = self.stubserver
         self.stubserver.set_system_get_id_result([])
         self.assertEquals(None, self.sw.find_hypervisor('unknown_hostname'))
 
@@ -138,7 +140,9 @@ class TestSpacewalkWrapper(unittest.TestCase):
 
         self.sw = old_sw
 
-    def test_spacewalk_associate_guest(self):
+    @patch('xmlrpclib.Server')
+    def test_spacewalk_associate_guest(self, mock_xmlrpclib):
+        mock_xmlrpclib.return_value = self.stubserver
         self.sw.associate_guest('B048F7F8-A310-11E3-8E5D-D749BDF4F982', '1234')
 
     def test_katello_unassociate_guest(self):
