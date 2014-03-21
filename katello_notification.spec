@@ -56,7 +56,7 @@ install -D etc/katello-notification.conf %{buildroot}/etc/katello/katello-notifi
 %if %use_systemd
     %systemd_post %{name}.service
 %else
-    /sbin/chkconfig --add %{name}
+    /sbin/chkconfig --add openstack-katello-notification
 %endif
 
 %preun
