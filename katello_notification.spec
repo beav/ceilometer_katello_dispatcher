@@ -1,6 +1,6 @@
 %global use_systemd (0%{?fedora} && 0%{?fedora} >= 17) || (0%{?rhel} && 0%{?rhel} >= 7)
 Name: katello_notification
-Version: 0.0.9
+Version: 0.0.10
 Release: 1%{?dist}
 
 Summary: A daemon to read events off of the openstack messagebus and feed into katello
@@ -102,6 +102,12 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Thu Mar 27 2014 Chris Duryee <cduryee@redhat.com> 0.0.10-1
+- rewrite to use oslo.messaging libs (cduryee@redhat.com)
+- initialize a new connection per-use (cduryee@redhat.com)
+- use correct init.d script name (cduryee@redhat.com)
+- systemd support (cduryee@redhat.com)
+
 * Sat Mar 15 2014 Chris Duryee <cduryee@redhat.com> 0.0.9-1
 - hack for registration race condition, and convert str to int
   (cduryee@redhat.com)
