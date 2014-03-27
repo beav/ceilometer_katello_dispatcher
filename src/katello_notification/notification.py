@@ -58,7 +58,7 @@ class KatelloMain():
 
     def main(self):
 
-        #TODO: clean up and make more configurable!
+        # TODO: clean up and make more configurable!
         logger = logging.getLogger('katello_notification')
         handler = logging.FileHandler("/var/log/katello_notification/katello_notification.log")
         formatter = logging.Formatter('%(asctime)s - %(name)s - @%(filename)s %(levelname)s - %(message)s')

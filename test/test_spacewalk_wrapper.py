@@ -41,7 +41,7 @@ username = admin
 password = admin
 """
 
-#this is missing unused values
+# this is missing unused values
 TEST_SYSID = {"system_id": '<?xml version="1.0"?><params><param><value>' +
                            '<struct><member><name>system_id</name><value>' +
                            '<string>ID-1000010007</string></value></member>' +
@@ -146,5 +146,5 @@ class TestSpacewalkWrapper(unittest.TestCase):
         self.sw.associate_guest('B048F7F8-A310-11E3-8E5D-D749BDF4F982', '1234')
 
     def test_katello_unassociate_guest(self):
-        #assert(False)
+        # assert(False)
         pass

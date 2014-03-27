@@ -19,7 +19,7 @@ class KatelloPayloadActions():
         hyp_consumer_uuid = self.katello.find_hypervisor(hyp_host)
         if not hyp_consumer_uuid:
             logger.error("no hypervisor found for %s" % hyp_host)
-            #TODO: optionally create a hypervisor here, based on config param
+            # TODO: optionally create a hypervisor here, based on config param
             raise RuntimeError("no hypervisor found for %s" % hyp_host)
         return hyp_consumer_uuid
 

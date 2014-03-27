@@ -70,12 +70,12 @@ class Spacewalk():
         # lucene just tightens the window but does not remove it.
         rpcserver, xmlrpcserver, key = self._create_conns()
 
-        #XXX: HORRIBLE HACK HERE! need to figure out how to make spacewalk reject duplicate registrations
-        #import time
-        #import random
-        #sleeptime = random.randint(0, 20)
-        #log.info("sleeping for %s" % sleeptime)
-        #time.sleep(sleeptime)
+        # XXX: HORRIBLE HACK HERE! need to figure out how to make spacewalk reject duplicate registrations
+        import time
+        import random
+        sleeptime = random.randint(0, 20)
+        logger.info("sleeping for %s" % sleeptime)
+        time.sleep(sleeptime)
         # end of hack
 
         result = rpcserver.system.getId(key, hypervisor_hostname)
@@ -146,7 +146,7 @@ class Spacewalk():
         logger.debug("searching for guest uuids for %s" % hypervisor_system_id)
         guest_list = self._get_guest_uuid_list(hypervisor_system_id)
         guest_list.append(instance_uuid)
-        #TODO: look up hypervisor info here to make plan more detailed?
+        # TODO: look up hypervisor info here to make plan more detailed?
         plan = self._assemble_plan(guest_list, hypervisor_system_id)
         logger.debug("sending plan %s" % plan)
         systemid = rpcserver.system.downloadSystemId(key, int(hypervisor_system_id))
