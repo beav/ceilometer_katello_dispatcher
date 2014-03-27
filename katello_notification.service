@@ -5,7 +5,7 @@ After=syslog.target network.target
 [Service]
 Type=simple
 User=ceilometer
-ExecStart=/usr/bin/katello-notification --logfile /var/log/ceilometer/katello-notification.log
+ExecStart=/usr/bin/katello-notification
 
 [Install]
 WantedBy=multi-user.target

@@ -4,8 +4,7 @@ import xmlrpclib
 
 import logging
 
-log = logging.getLogger(__name__)
-logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger('katello_notification')
 
 
 class Spacewalk():
@@ -14,9 +13,9 @@ class Spacewalk():
         # do this now just so we can print an error on startup of the connection info is wrong
         rpcserver, xmlrpcserver, key = self._create_conns()
         if self.autoregister_hypervisors:
-            log.info("hypervisor autoregistration is enabled")
+            logger.info("hypervisor autoregistration is enabled")
         else:
-            log.info("hypervisor autoregistration is disabled")
+            logger.info("hypervisor autoregistration is disabled")
 
     def _create_conns(self):
         """
@@ -25,15 +24,15 @@ class Spacewalk():
         to spacewalk.
         """
         server = 'https://' + self.sw_host + ':' + self.sw_port
-        log.debug("Initializing spacewalk connection to %s" % server)
+        logger.debug("Initializing spacewalk connection to %s" % server)
         try:
             rpcserver = xmlrpclib.Server(server + '/rpc/api', verbose=0)
             xmlrpcserver = xmlrpclib.Server(server + '/XMLRPC', verbose=0)
         except Exception:
             raise SpacewalkError("Unable to connect to the spacewalk server")
-            log.error("unable to connect to spacewalk server")
+            logger.error("unable to connect to spacewalk server")
         key = rpcserver.auth.login(self.sw_username, self.sw_password)
-        log.debug("Initialized spacewalk connection")
+        logger.debug("Initialized spacewalk connection")
         return (rpcserver, xmlrpcserver, key)
 
     def _load_config(self):
@@ -48,11 +47,11 @@ class Spacewalk():
 
     def _create_hypervisor(self, hypervisor_hostname):
         rpcserver, xmlrpcserver, key = self._create_conns()
-        log.debug("creating new system in spacewalk")
+        logger.debug("creating new system in spacewalk")
         new_system = xmlrpcserver.registration.new_system_user_pass(hypervisor_hostname,
                         "unknown", "6Server", "x86_64", self.sw_username, self.sw_password, {})
         xmlrpcserver.registration.refresh_hw_profile(new_system['system_id'], [])
-        log.debug("done creating new system in spacewalk, parsing systemid from xml: %s" % new_system['system_id'])
+        logger.debug("done creating new system in spacewalk, parsing systemid from xml: %s" % new_system['system_id'])
         # a bit obtuse, but done the same way in rhn client tools (the '3:' strips the 'ID-')
         system_id = xmlrpclib.loads(new_system['system_id'])[0][0]['system_id'][3:]
         # make sure we get an int here, not the str
@@ -81,14 +80,14 @@ class Spacewalk():
 
         result = rpcserver.system.getId(key, hypervisor_hostname)
         if len(result) == 0 and self.autoregister_hypervisors:
-            log.info("no hypervisor found for %s, creating new record in spacewalk" % hypervisor_hostname)
+            logger.info("no hypervisor found for %s, creating new record in spacewalk" % hypervisor_hostname)
             system_id = self._create_hypervisor(hypervisor_hostname)
-            log.info("created systemid %s for new hypervisor %s" % (system_id, hypervisor_hostname))
+            logger.info("created systemid %s for new hypervisor %s" % (system_id, hypervisor_hostname))
             return system_id
         if len(result) > 1:
             raise RuntimeError("more than one system record found for profile name %s. Please remove extraneous system records in spacewalk." % hypervisor_hostname)
         if len(result) == 1:
-            log.info("found system %s for hostname %s" % (result[0]['id'], hypervisor_hostname))
+            logger.info("found system %s for hostname %s" % (result[0]['id'], hypervisor_hostname))
             return result[0]['id']
 
     def _assemble_plan(self, guests, hypervisor_name):
@@ -130,7 +129,7 @@ class Spacewalk():
         guest_list = rpcserver.system.listVirtualGuests(key, int(sid))
         # strip the list to just the UUIDs
         uuids = map(lambda x: x['uuid'], guest_list)
-        log.debug("guest list for %s: %s" % (sid, uuids))
+        logger.debug("guest list for %s: %s" % (sid, uuids))
         return uuids
 
     def associate_guest(self, instance_uuid, hypervisor_system_id):
@@ -144,14 +143,14 @@ class Spacewalk():
 
         """
         rpcserver, xmlrpcserver, key = self._create_conns()
-        log.debug("searching for guest uuids for %s" % hypervisor_system_id)
+        logger.debug("searching for guest uuids for %s" % hypervisor_system_id)
         guest_list = self._get_guest_uuid_list(hypervisor_system_id)
         guest_list.append(instance_uuid)
         #TODO: look up hypervisor info here to make plan more detailed?
         plan = self._assemble_plan(guest_list, hypervisor_system_id)
-        log.debug("sending plan %s" % plan)
+        logger.debug("sending plan %s" % plan)
         systemid = rpcserver.system.downloadSystemId(key, int(hypervisor_system_id))
         xmlrpcserver.registration.virt_notify(systemid, plan)
 
     def unassociate_guest(self, instance_uuid, hypervisor_uuid):
-        log.info("spacewalk does not support removing guests from hypervisors, no action taken")
+        logger.info("spacewalk does not support removing guests from hypervisors, no action taken")

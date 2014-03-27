@@ -5,22 +5,21 @@ from ConfigParser import SafeConfigParser
 
 import logging
 
-log = logging.getLogger(__name__)
-logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger('katello_notification')
 
 
 class Katello():
     def __init__(self):
         self.systemapi = SystemAPI()
         self._load_config()
-        log.info("connecting to %s://%s:%s%s" % (self.kt_scheme, self.kt_host, self.kt_port, self.kt_path))
+        logger.info("connecting to %s://%s:%s%s" % (self.kt_scheme, self.kt_host, self.kt_port, self.kt_path))
         s = server.KatelloServer(self.kt_host, self.kt_port, self.kt_scheme, self.kt_path)
         s.set_auth_method(BasicAuthentication(self.kt_username, self.kt_password))
         server.set_active_server(s)
         if self.autoregister_hypervisors:
-            log.info("hypervisor autoregistration is enabled")
+            logger.info("hypervisor autoregistration is enabled")
         else:
-            log.info("hypervisor autoregistration is disabled")
+            logger.info("hypervisor autoregistration is disabled")
 
     def _load_config(self):
         CONFIG_FILENAME = '/etc/katello/katello-notification.conf'
@@ -51,19 +50,19 @@ class Katello():
         systems = self.systemapi.systems_by_org(self.kt_org, {'search': "network.hostname:%s" % hypervisor_hostname})
 
         if len(systems) > 1:
-            log.error("found too many systems for %s, name is ambiguous" % hypervisor_hostname)
+            logger.error("found too many systems for %s, name is ambiguous" % hypervisor_hostname)
             return
         if len(systems) == 0:
             if self.autoregister_hypervisors:
-                log.info("found zero systems for %s, creating hypervisor" % hypervisor_hostname)
+                logger.info("found zero systems for %s, creating hypervisor" % hypervisor_hostname)
                 consumer_uuid = self._create_hypervisor(hypervisor_hostname)
-                log.info("hypervisor record created for %s, consumer uuid %s" % (hypervisor_hostname, consumer_uuid))
+                logger.info("hypervisor record created for %s, consumer uuid %s" % (hypervisor_hostname, consumer_uuid))
                 return consumer_uuid
             else:
-                log.error("found zero systems for %s" % hypervisor_hostname)
+                logger.error("found zero systems for %s" % hypervisor_hostname)
                 return
 
-        log.info("found %s for hostname %s!" % (systems[0]['uuid'], hypervisor_hostname))
+        logger.info("found %s for hostname %s!" % (systems[0]['uuid'], hypervisor_hostname))
         return systems[0]['uuid']
 
     def associate_guest(self, instance_uuid, hypervisor_uuid):
@@ -73,9 +72,9 @@ class Katello():
         this method has a race condition, since it grabs the guest list, then sends an updated version.
         """
 
-        log.debug("finding system record for hypervisor %s" % hypervisor_uuid)
+        logger.debug("finding system record for hypervisor %s" % hypervisor_uuid)
         system = self.systemapi.system(hypervisor_uuid)
-        log.debug("existing guest list: %s" % system['guestIds'])
+        logger.debug("existing guest list: %s" % system['guestIds'])
 
         # the data that "update" expects is different than what is pulled down
         params = {}
@@ -92,18 +91,18 @@ class Katello():
             params['guestIds'] = guests
         elif guests and instance_uuid in guests:
             # guest is already associated, no-op (this can happen from instance.exists messages)
-            log.debug("guest %s is already associated with hypervisor %s" % (instance_uuid, hypervisor_uuid))
+            logger.debug("guest %s is already associated with hypervisor %s" % (instance_uuid, hypervisor_uuid))
             return
         elif not guests:
             params['guestIds'] = [instance_uuid]
 
-        log.info("sending guest list: %s" % params['guestIds'])
+        logger.info("sending guest list: %s" % params['guestIds'])
         self.systemapi.update(hypervisor_uuid, params)
 
     def unassociate_guest(self, instance_uuid, hypervisor_uuid):
-        log.debug("finding system record for hypervisor %s" % hypervisor_uuid)
+        logger.debug("finding system record for hypervisor %s" % hypervisor_uuid)
         system = self.systemapi.system(hypervisor_uuid)
-        log.debug("existing guest list: %s" % system['guestIds'])
+        logger.debug("existing guest list: %s" % system['guestIds'])
 
         # the data that "update" expects is different than what is pulled down
         params = {}
@@ -119,8 +118,8 @@ class Katello():
             guests.remove(instance_uuid)
             params['guestIds'] = guests
         else:
-            log.debug("attempted to remove already-removed guest %s from hypervisor %s" % (instance_uuid, hypervisor_uuid))
+            logger.debug("attempted to remove already-removed guest %s from hypervisor %s" % (instance_uuid, hypervisor_uuid))
             return
 
-        log.info("sending guest list: %s" % params['guestIds'])
+        logger.info("sending guest list: %s" % params['guestIds'])
         self.systemapi.update(hypervisor_uuid, params)
