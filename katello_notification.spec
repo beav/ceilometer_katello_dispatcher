@@ -51,6 +51,7 @@ rm -rf %{buildroot}
 %endif
 install -D bin/katello-notification %{buildroot}/usr/bin/katello-notification
 install -D etc/katello-notification.conf %{buildroot}/etc/katello/katello-notification.conf
+install -d -m 755 %{buildroot}/%{_var}/log/%{name}
 
 %post
 %if %use_systemd
@@ -95,6 +96,7 @@ rm -rf %{buildroot}
     %attr(755,root,root) %{_initrddir}/openstack-katello-notification
 %endif
 %config(noreplace) %attr(644,root,root) %{_sysconfdir}/katello/katello-notification.conf
+%attr(755,ceilometer,root) %dir %{_var}/log/%{name}
 
 
 

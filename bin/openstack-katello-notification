@@ -18,9 +18,8 @@
 
 exec="/usr/bin/katello-notification"
 prog=katello-notification
-config="/etc/ceilometer/ceilometer.conf"
-pidfile="/var/run/ceilometer/katello-notification.pid"
-logfile="/var/log/ceilometer/katello-notification.log"
+config="/etc/katello/katello-notification.conf"
+pidfile="/var/run/katello_notification/katello-notification.pid"
 
 [ -e /etc/sysconfig/$prog ] && . /etc/sysconfig/$prog
 
@@ -30,7 +29,7 @@ start() {
     [ -x $exec ] || exit 5
     [ -f $config ] || exit 6
     echo -n $"Starting $prog: "
-    daemon --user ceilometer --pidfile $pidfile "$exec --logfile $logfile &>/dev/null & echo \$! > $pidfile"
+    daemon --user ceilometer --pidfile $pidfile "$exec &>/dev/null & echo \$! > $pidfile"
     retval=$?
     echo
     [ $retval -eq 0 ] && touch $lockfile

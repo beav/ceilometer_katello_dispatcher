@@ -1,4 +1,4 @@
-#based on ceilometer.compute.notification.instance
+# based on ceilometer.compute.notification.instance
 from ceilometer.compute import notifications
 from ceilometer import sample
 

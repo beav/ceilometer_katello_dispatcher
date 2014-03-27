@@ -2,7 +2,8 @@
 
 import sys
 
-from katello_notification.notification import agent
+from katello_notification.notification import KatelloMain
 
 if __name__ == "__main__":
-    sys.exit(agent())
+    km = KatelloMain()
+    sys.exit(km.main())
