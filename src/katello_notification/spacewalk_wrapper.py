@@ -71,11 +71,11 @@ class Spacewalk():
         rpcserver, xmlrpcserver, key = self._create_conns()
 
         # XXX: HORRIBLE HACK HERE! need to figure out how to make spacewalk reject duplicate registrations
-        import time
-        import random
-        sleeptime = random.randint(0, 20)
-        logger.info("sleeping for %s" % sleeptime)
-        time.sleep(sleeptime)
+        #import time
+        #import random
+        #sleeptime = random.randint(0, 20)
+        #logger.info("sleeping for %s" % sleeptime)
+        #time.sleep(sleeptime)
         # end of hack
 
         result = rpcserver.system.getId(key, hypervisor_hostname)
