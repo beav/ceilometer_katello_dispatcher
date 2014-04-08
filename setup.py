@@ -17,7 +17,7 @@ from setuptools import setup, find_packages, Extension
 
 setup(
     name="katello_notification",
-    version='0.0.10',
+    version='0.0.11',
     description='an oslo messagebus reader for interpreting events relevant to katello',
     author='Chris Duryee',
     author_email='cduryee@redhat.com',

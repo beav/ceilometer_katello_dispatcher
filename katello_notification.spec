@@ -1,6 +1,6 @@
 %global use_systemd (0%{?fedora} && 0%{?fedora} >= 17) || (0%{?rhel} && 0%{?rhel} >= 7)
 Name: katello_notification
-Version: 0.0.10
+Version: 0.0.11
 Release: 1%{?dist}
 
 Summary: A daemon to read events off of the openstack messagebus and feed into katello
@@ -102,6 +102,10 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Tue Apr 08 2014 Chris Duryee <cduryee@redhat.com> 0.0.11-1
+- 1081868: better error message when systems are not found (cduryee@redhat.com)
+- allow setting log level via conf file (cduryee@redhat.com)
+
 * Thu Mar 27 2014 Chris Duryee <cduryee@redhat.com> 0.0.10-1
 - rewrite to use oslo.messaging libs (cduryee@redhat.com)
 - initialize a new connection per-use (cduryee@redhat.com)
