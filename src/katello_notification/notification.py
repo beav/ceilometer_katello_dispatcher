@@ -10,6 +10,9 @@ import logging
 
 logger = logging.getLogger('katello_notification')
 
+LOG_LOCATION = "/var/log/katello_notification/katello_notification.log"
+CONFIG_FILENAME = "/etc/katello/katello-notification.conf"
+
 
 class NotificationEndpoint(object):
 
@@ -51,23 +54,28 @@ class NotificationEndpoint(object):
 
 class KatelloMain():
     def _katello_or_spacewalk(self):
-        CONFIG_FILENAME = '/etc/katello/katello-notification.conf'
         conf = SafeConfigParser()
         conf.readfp(open(CONFIG_FILENAME))
         return conf.get('main', 'mgmt_server')
+
+    def _get_loglevel(self):
+        conf = SafeConfigParser()
+        conf.readfp(open(CONFIG_FILENAME))
+        return conf.get('main', 'loglevel')
 
     def main(self):
 
         # TODO: clean up and make more configurable!
         logger = logging.getLogger('katello_notification')
-        handler = logging.FileHandler("/var/log/katello_notification/katello_notification.log")
+        logger.setLevel(self._get_loglevel())
+        handler = logging.FileHandler(LOG_LOCATION)
         formatter = logging.Formatter('%(asctime)s - %(name)s - @%(filename)s %(levelname)s - %(message)s')
         handler.setFormatter(formatter)
         logger.addHandler(handler)
 
+        # quick config check
         mgmt_server = self._katello_or_spacewalk()
 
-        # quick config check
         if mgmt_server == 'katello':
             payload_actions = KatelloPayloadActions()
         elif mgmt_server == 'spacewalk':
