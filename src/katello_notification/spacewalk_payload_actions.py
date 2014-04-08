@@ -19,8 +19,7 @@ class SpacewalkPayloadActions():
         hyp_host = payload.get('host')
         hyp_system_id = self.spacewalk.find_hypervisor(hyp_host)
         if not hyp_system_id:
-            logger.error("no hypervisor found for %s - perhaps it needs to be registered to spacewalk?" % hyp_host)
-            raise RuntimeError("no hypervisor found for %s" % hyp_host)
+            raise RuntimeError("no hypervisor found for %s - perhaps it needs to be registered via rhn-register, or autoregistered?" % hyp_host)
         return hyp_system_id
 
     def create_guest_mapping(self, payload, hypervisor_consumer_uuid):
