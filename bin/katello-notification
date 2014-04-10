@@ -1,9 +1,20 @@
 #!/usr/bin/python
 
 import sys
+from optparse import OptionParser
 
 from katello_notification.notification import KatelloMain
 
 if __name__ == "__main__":
+    usage = "Usage: katello-notification"
+    description = "A daemon to initialize katello-notification. It simply " + \
+                  "creates a katello-notification instance; arguments are " + \
+                  "read from /etc/katello/katello-notification.conf.  You " + \
+                  "likely will want to run this via the " + \
+                  "katello_notification service script instead of using " + \
+                  "this script directly."
+
+    parser = OptionParser(usage=usage, description=description)
+    (options, args) = parser.parse_args()
     km = KatelloMain()
     sys.exit(km.main())
