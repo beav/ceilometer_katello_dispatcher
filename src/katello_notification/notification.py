@@ -63,6 +63,11 @@ class KatelloMain():
         conf.readfp(open(CONFIG_FILENAME))
         return conf.get('main', 'loglevel')
 
+    def _get_amqp_url(self):
+        conf = SafeConfigParser()
+        conf.readfp(open(CONFIG_FILENAME))
+        return conf.get('main', 'loglevel')
+
     def main(self):
 
         # TODO: clean up and make more configurable!
@@ -84,7 +89,7 @@ class KatelloMain():
             logger.error("mgmt server not set to 'katello' or 'spacewalk', aborting")
 
         # set up transport and listener
-        transport = messaging.get_transport(cfg.CONF, url='qpid://localhost:5672')
+        transport = messaging.get_transport(cfg.CONF, url=self._get_amqp_url())
 
         targets = [
             messaging.Target(topic='subscription_notifications', exchange='nova'),
