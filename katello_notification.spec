@@ -1,6 +1,6 @@
 %global use_systemd (0%{?fedora} && 0%{?fedora} >= 17) || (0%{?rhel} && 0%{?rhel} >= 7)
 Name: katello_notification
-Version: 0.0.11
+Version: 0.0.12
 Release: 1%{?dist}
 
 Summary: A daemon to read events off of the openstack messagebus and feed into katello
@@ -102,6 +102,11 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Mon May 19 2014 Chris Duryee <cduryee@redhat.com> 0.0.12-1
+- make messagebus URL configurable (cduryee@redhat.com)
+- 1085281: add usage info to katello-notification wrapper script
+  (cduryee@redhat.com)
+
 * Tue Apr 08 2014 Chris Duryee <cduryee@redhat.com> 0.0.11-1
 - 1081868: better error message when systems are not found (cduryee@redhat.com)
 - allow setting log level via conf file (cduryee@redhat.com)
