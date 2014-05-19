@@ -66,7 +66,7 @@ class KatelloMain():
     def _get_amqp_url(self):
         conf = SafeConfigParser()
         conf.readfp(open(CONFIG_FILENAME))
-        return conf.get('main', 'loglevel')
+        return conf.get('main', 'amqp_url')
 
     def main(self):
 
