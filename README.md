@@ -1,56 +1,74 @@
-![build status](https://travis-ci.org/Katello/ceilometer_katello_dispatcher.png?branch=master)
+![build status](https://api.travis-ci.org/Katello/katello_notification.png?branch=master)
 
-ceilometer_katello_dispatcher
-=============================
+katello_notification
+====================
 
-This is a ceilometer dispatcher that feeds instance data directly into Katello. Systems do not have to register with subscription-manager in order to show up. This allows non-RHEL systems to show up as consumers in Katello.
+This is a daemon that reads data from the OpenStack message bus (either rabbit
+or qpid) and feeds instance data directly into Katello. Currently, host/guest
+UUID mappings are sent via katello_notification to either Katello or Spacewalk.
 
-If a system does register with subscription-manager using the existing UUID, it will re-use the existing consumer record. When the system is terminated, its consumer record will disappear.
+setup
+-----
+
+ * set up an openstack instance if one does not already exist. RDO works fine for this.
+ * edit `/etc/katello/katello_notification.conf` to point to your katello or spacewalk instance.
+ * start katello_notification (`systemctl start katello_notification`)
+ * edit `/etc/nova/nova.conf`:
+```
+    -#notification_driver=
+    +notification_driver=messaging
+
+    -#notification_topics=notifications
+    +notification_topics=notifications,subscription_notifications
+
+    -#instance_usage_audit_period=month
+    +instance_usage_audit_period=hour
+
+    -#instance_usage_audit=false
+    +instance_usage_audit=true
+```
+
+  * restart nova via `openstack-service restart nova`
+
+troubleshooting
+---------------
+
+You should see messages in `/var/log/katello/katello_notification.log`. An
+example successful startup looks like this:
+
+    2014-05-19 17:36:13,240 - katello_notification - @katello_payload_actions.py INFO - initializing payload actions
+    2014-05-19 17:36:13,241 - katello_notification - @katello_wrapper.py INFO - connecting to https://xxx.xxx.xxx.xxx:443/sam
+    2014-05-19 17:36:13,241 - katello_notification - @katello_wrapper.py INFO - hypervisor autoregistration is disabled
+    2014-05-19 17:36:13,312 - katello_notification - @notification.py INFO - listener initialized
+
+When a system appears in OpenStack, nova generates an event. This event is read
+by katello_notification which then fires a message to either Katello or
+Spacewalk. You should see log messages appear when this happens. If not, then
+ensure that nova.conf was set up correctly, and that nova was restarted _after_
+katello_notification was started. In some cases, nova will not publish to the
+subscription_notification topic unless katello_notification has already
+registered as a reader.
+
+Note also that katello_notification simply sends host/guest information in a
+similar fashion to virt-who or rhn-virtualization-host; it does not register
+guests. However, once guests register, they should be associated with the
+correct hypervisor.
+
+Hypervisors are _not_ registered by default. If the hypervisor is not capable
+of registering istelf to Katello or Spacewalk, you may set
+`autoregister_hypervisors = true` in katello_notification.conf
+
 
 requirements
 ------------
-* python-rhsm 1.8.9 or later
-* katello of a recent vintage that includes hash 5a12757
+ * an Icehouse-based OpenStack installation
+ * either a Katello (pre-1.5) or Spacewalk instance
 
-
-to set up an rdo instance in a vm
----------------------------------
-
- * find a fedora machine
- * if intel, run "rmmod kvm_intel; modprobe kvm_intel nested=y"
- * create a rhel or centos vm. 4GB mem and 2 CPU works ok.
- * on the VM: follow http://openstack.redhat.com/QuickStartLatest or http://openstack.redhat.com/Quickstart
- * on the VM: edit /etc/rhsm/rhsm.conf to point to your katello system
- * on the VM: install the ceilometer_katello_dispatcher rpm, and edit /etc/ceilometer/ceilometer.conf
-
-        [dispatcher_katello]
-        default_owner = ACME_Corporation
-
-        [collector]
-        dispatchers = katello 
-        dispatchers = database # this needs to be defined if we are also defining the katello dispatcher
-
- * on the VM: service openstack-ceilometer-collector restart
- * from the horizon dashboard, fire up an instance. Cirros works fine for this.
- * you should see katello-related output in /var/log/ceilometer/collector.log
-
-to install without RPM: python ./setup.py install; service openstack-ceilometer-collector restart
-
-to install/update a new RPM after commiting changes to local repo: tito build --test --rpm --install; service openstack-ceilometer-collector restart
-
-log messages are sent to /var/log/ceilometer/collector.log
-
-TODO
-----
-
- * feed host/guest info to katello from ceilometer events
- * create system checkins from hourly instance.exists events
 
 development howto
 -----------------
 
- * fork a copy of https://github.com/Katello/ceilometer_katello_dispatcher
- * find an example of the message you are interested in acting on from collector.log, put message in test_dispatcher.py
+ * fork a copy of https://github.com/Katello/katello_notification
  * write some failing nosetests, just run "make" to run them
  * fix tests
  * integration test (still manual process for now)
