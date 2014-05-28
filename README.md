@@ -11,7 +11,9 @@ setup
 -----
 
  * set up an openstack instance if one does not already exist. RDO works fine for this.
- * edit `/etc/katello/katello_notification.conf` to point to your katello or spacewalk instance.
+ * edit `/etc/katello/katello-notification.conf` to point to your katello or
+   spacewalk instance, and change **mgmt_server** to **katello** or **spacewalk** as
+   appropriate.
  * start katello_notification (`systemctl start katello_notification`)
  * edit `/etc/nova/nova.conf`:
 ```
@@ -56,13 +58,22 @@ correct hypervisor.
 
 Hypervisors are _not_ registered by default. If the hypervisor is not capable
 of registering istelf to Katello or Spacewalk, you may set
-`autoregister_hypervisors = true` in katello_notification.conf
+**autoregister_hypervisors = true** in katello_notification.conf. Note that in
+the event that your management server is also a hypervisor (common on
+"all-in-one" packstack installs), this setting will automatically register your
+server.  Of course, if your all-in-one server is capable of running
+katello_notification, it is very likely that it can register on its own via
+standard registration tooling, which is the preferred method.
 
 
 requirements
 ------------
  * an Icehouse-based OpenStack installation
  * either a Katello (pre-1.5) or Spacewalk instance
+
+Note that katello_notification does not use the same credentials as the system
+it's running on to talk to Katello or Spacewalk. Thus, it is possible for
+katello_notification to run on a system that is not registered.
 
 
 development howto
